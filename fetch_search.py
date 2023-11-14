@@ -11,7 +11,7 @@ from nltk.corpus import stopwords
 
 
 # Load your dataset
-data = pd.read_csv('C:\\Users\\SUHAS\\Downloads\\Fetch Challenge\\merged_data_fetch.csv')
+data = pd.read_csv('merged_data_fetch.csv')
 # Sidebar
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ('Home', 'Data and Preprocessing', 'Model'))
@@ -22,9 +22,9 @@ if page == 'Data and Preprocessing':
     st.title("Data and Preprocessing Page")
 
     # Load additional datasets
-    brands = pd.read_csv('C:\\Users\\SUHAS\\Downloads\\Fetch Challenge\\brand_category.csv')
-    categories = pd.read_csv('C:\\Users\\SUHAS\\Downloads\\Fetch Challenge\\categories.csv')
-    retailer = pd.read_csv('C:\\Users\\SUHAS\\Downloads\\Fetch Challenge\\offer_retailer.csv')
+    brands = pd.read_csv('brand_category.csv')
+    categories = pd.read_csv('categories.csv')
+    retailer = pd.read_csv('offer_retailer.csv')
 
     # Display shapes and info of the datasets
     st.subheader("Shapes of Datasets")
