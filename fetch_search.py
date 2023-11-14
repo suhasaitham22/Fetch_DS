@@ -26,19 +26,27 @@ if page == 'Data and Preprocessing':
     categories = pd.read_csv('categories.csv')
     retailer = pd.read_csv('offer_retailer.csv')
 
-    # Display shapes and info of the datasets
-    st.subheader("Shapes of Datasets")
-    st.text(f"Brands: {brands.shape}")
-    st.text(f"Categories: {categories.shape}")
-    st.text(f"Retailer: {retailer.shape}")
+    # Display information options
+    display_options = st.multiselect("Select Information to Display", ["Sample Data", "Shapes of Datasets", "Info of Datasets"])
 
-    st.subheader("Info of Datasets")
-    st.text("Brands:")
-    st.text(brands.info())
-    st.text("Categories:")
-    st.text(categories.info())
-    st.text("Retailer:")
-    st.text(retailer.info())
+    # Sample Data
+    if "Sample Data" in display_options:
+        dataset_choice = st.selectbox("Select Dataset for Sample Data", ["Brands", "Categories", "Retailer"])
+        st.subheader(f"Sample Data - {dataset_choice}:")
+        st.dataframe(eval(dataset_choice.lower()).head(10))
+
+    # Shapes of Datasets
+    if "Shapes of Datasets" in display_options:
+        st.subheader("Shapes of Datasets:")
+        st.text(f"Brands: {brands.shape}")
+        st.text(f"Categories: {categories.shape}")
+        st.text(f"Retailer: {retailer.shape}")
+
+    # Info of Datasets
+    if "Info of Datasets" in display_options:
+        dataset_choice = st.selectbox("Select Dataset for Info", ["Brands", "Categories", "Retailer"])
+        st.subheader(f"Info of {dataset_choice}:")
+        st.text(eval(dataset_choice.lower()).info())
 
     # Display sample data
     st.subheader("Sample Data:")
@@ -49,66 +57,67 @@ if page == 'Data and Preprocessing':
     st.text("Retailer:")
     st.dataframe(retailer.head())
 
-    # Preprocessing Data
+# Ask user if they want to see preprocessing steps
+show_preprocessing = st.checkbox("Show Preprocessing Steps", value=False)
 
+# Preprocessing Data
+if show_preprocessing:
     # Fill missing values in 'RETAILER' column
-    retailer['RETAILER'].fillna('Unknown', inplace=True)
+    show_fillna_retailer = st.checkbox("Fill Missing Values in RETAILER column", value=False)
+    if show_fillna_retailer:
+        retailer['RETAILER'].fillna('Unknown', inplace=True)
 
     # Convert to lowercase
-    retailer = retailer.applymap(lambda x: x.lower() if type(x) == str else x)
-    brands = brands.applymap(lambda x: x.lower() if type(x) == str else x)
-    categories = categories.applymap(lambda x: x.lower() if type(x) == str else x)
+    show_lowercase_conversion = st.checkbox("Convert to Lowercase", value=False)
+    if show_lowercase_conversion:
+        retailer = retailer.applymap(lambda x: x.lower() if type(x) == str else x)
+        brands = brands.applymap(lambda x: x.lower() if type(x) == str else x)
+        categories = categories.applymap(lambda x: x.lower() if type(x) == str else x)
 
-    # Remove punctuation and handle common terms
-    categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
-    categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
+    # Remove punctuation and handle common terms for PRODUCT_CATEGORY
+    show_punctuation_removal_category = st.checkbox("Remove Punctuation and Handle Common Terms for PRODUCT_CATEGORY", value=False)
+    if show_punctuation_removal_category:
+        categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
+        categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
+        categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
+        categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
 
-    # Tokenization and Lemmatization
-    lemmatizer = WordNetLemmatizer()
-    categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
-    categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
+    # Tokenization and Lemmatization for PRODUCT_CATEGORY
+    show_lemmatization_category = st.checkbox("Tokenization and Lemmatization for PRODUCT_CATEGORY", value=False)
+    if show_lemmatization_category:
+        lemmatizer = WordNetLemmatizer()
+        categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
+        categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
 
-    # Remove punctuation
-    brands['BRAND'] = brands['BRAND'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    brands['BRAND_BELONGS_TO_CATEGORY'] = brands['BRAND_BELONGS_TO_CATEGORY'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-
-    # Remove noise and handle common terms for PRODUCT_CATEGORY
-    categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
-
-    # Remove noise and handle common terms for IS_CHILD_CATEGORY_TO
-    categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
-
-    # Tokenization and Lemmatization
-    lemmatizer = WordNetLemmatizer()
-    brands['BRAND'] = brands['BRAND'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
-    brands['BRAND_BELONGS_TO_CATEGORY'] = brands['BRAND_BELONGS_TO_CATEGORY'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
-
-    # Remove punctuation
-    retailer['OFFER'] = retailer['OFFER'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    retailer['RETAILER'] = retailer['RETAILER'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    retailer['BRAND'] = retailer['BRAND'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-
-    # Tokenization and Lemmatization
-    lemmatizer = WordNetLemmatizer()
-    retailer['OFFER'] = retailer['OFFER'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
-    retailer['RETAILER'] = retailer['RETAILER'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
-    retailer['BRAND'] = retailer['BRAND'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
-
-    # Remove stopwords
-    stop_words = set(stopwords.words('english'))
-    retailer['OFFER'] = retailer['OFFER'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word not in stop_words]) if type(x) == str else x)
+    # Remove punctuation for BRAND
+    show_punctuation_removal_brands = st.checkbox("Remove Punctuation for Brands", value=False)
+    if show_punctuation_removal_brands:
+        brands['BRAND'] = brands['BRAND'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
+        brands['BRAND_BELONGS_TO_CATEGORY'] = brands['BRAND_BELONGS_TO_CATEGORY'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
 
     # Remove noise and handle common terms for RETAILER
-    retailer['RETAILER'] = retailer['RETAILER'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    retailer['RETAILER'] = retailer['RETAILER'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
+    show_common_terms_removal_retailer = st.checkbox("Remove Noise and Handle Common Terms for RETAILER", value=False)
+    if show_common_terms_removal_retailer:
+        retailer['RETAILER'] = retailer['RETAILER'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
+        retailer['RETAILER'] = retailer['RETAILER'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
 
     # Remove noise and handle common terms for BRAND
-    retailer['BRAND'] = retailer['BRAND'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    retailer['BRAND'] = retailer['BRAND'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
+    show_common_terms_removal_brands = st.checkbox("Remove Noise and Handle Common Terms for BRAND", value=False)
+    if show_common_terms_removal_brands:
+        retailer['BRAND'] = retailer['BRAND'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
+        retailer['BRAND'] = retailer['BRAND'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
+
+    # Tokenization and Lemmatization for OFFER
+    show_lemmatization_offer = st.checkbox("Tokenization and Lemmatization for OFFER", value=False)
+    if show_lemmatization_offer:
+        lemmatizer = WordNetLemmatizer()
+        retailer['OFFER'] = retailer['OFFER'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
+
+    # Remove stopwords for OFFER
+    show_stopwords_removal_offer = st.checkbox("Remove Stopwords for OFFER", value=False)
+    if show_stopwords_removal_offer:
+        stop_words = set(stopwords.words('english'))
+        retailer['OFFER'] = retailer['OFFER'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word not in stop_words]) if type(x) == str else x)
 
     # Display the preprocessed data
     st.subheader("Preprocessed Data:")
@@ -118,6 +127,7 @@ if page == 'Data and Preprocessing':
     st.dataframe(brands.head())
     st.text("Preprocessed Categories Data:")
     st.dataframe(categories.head())
+
 
 # Model Page
 if page == 'Model':
