@@ -1,3 +1,4 @@
+import re
 import streamlit as st
 import pandas as pd
 import string
@@ -189,8 +190,9 @@ if page == 'Data and Preprocessing':
 
 # Function to preprocess text
 def preprocess_text(text):
-    # Tokenize, convert to lowercase, remove punctuation
-    return ' '.join(word_tokenize(text.lower()) if type(text) == str else text)
+    # Remove special characters, tokenize, convert to lowercase
+    processed_text = re.sub(r'[^\w\s]', '', text)
+    return ' '.join(word_tokenize(processed_text.lower()) if type(processed_text) == str else processed_text)
 
 # Model Page
 if page == 'Model':
