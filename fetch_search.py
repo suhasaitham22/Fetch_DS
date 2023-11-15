@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import string
 import nltk
+import ssl
+
+# Set the NLTK data path
+nltk.data.path.append("/home/appuser/nltk_data")
 
 # Download NLTK data
 nltk.download('punkt')
