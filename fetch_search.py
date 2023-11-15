@@ -185,7 +185,7 @@ if page == 'Data and Preprocessing':
         st.subheader("Merged Data:")
         st.dataframe(merged_data)
 
-# Model Page
+# Model Page# Model Page
 if page == 'Model':
     st.title("Model Page")
 
@@ -204,19 +204,27 @@ if page == 'Model':
         elif option == 'Retailer':
             input_column = 'RETAILER'
 
-        # TF-IDF Vectorization
-        tfidf_vectorizer = TfidfVectorizer(stop_words='english')
-        tfidf_matrix = tfidf_vectorizer.fit_transform(processed_data[input_column])
+        # Use only the 'OFFER' column for text similarity calculation
+        merged_data['combined_text'] = merged_data['OFFER']
 
-        # User input vectorization
-        user_query_vector = tfidf_vectorizer.transform([search_query])
+        # Fill NaN values in the 'combined_text' column with an empty string
+        merged_data['combined_text'] = merged_data['combined_text'].fillna('')
 
-        # Compute similarity scores
-        similarity_scores = linear_kernel(user_query_vector, tfidf_matrix).flatten()
+        # Create a TF-IDF vectorizer
+        vectorizer = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = vectorizer.fit_transform(merged_data['combined_text'])
 
-        # Sort offers by similarity score
-        processed_data['Similarity Score'] = similarity_scores
-        sorted_data = processed_data.sort_values(by='Similarity Score', ascending=False)
+        # Transform the user input using the same vectorizer
+        user_tfidf = vectorizer.transform([search_query])
+
+        # Calculate cosine similarity between user input and each offer
+        cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
+
+        # Add the similarity scores to the merged_data DataFrame
+        merged_data['Similarity Score'] = cosine_similarities
+
+        # Sort offers based on similarity score
+        sorted_data = merged_data.sort_values(by='Similarity Score', ascending=False)
 
         # Filter results based on user input criteria
         filtered_data = sorted_data[sorted_data[input_column].str.lower() == search_query.lower()]
