@@ -2,10 +2,13 @@ import streamlit as st
 import pandas as pd
 import string
 import nltk
-nltk.download()
+
+# Download NLTK data
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('stopwords')
+
+# Import NLTK components after downloading data
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
