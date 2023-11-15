@@ -2,7 +2,9 @@ import streamlit as st
 import pandas as pd
 import string
 import nltk
-import ssl
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
 
 # Download NLTK data
 nltk.download('punkt')
@@ -37,23 +39,6 @@ if page == 'Data and Preprocessing':
     categories = pd.read_csv('categories.csv')
     retailer = pd.read_csv('offer_retailer.csv')
 
-    # Checkbox to display joining data steps
-    show_joining_steps = st.checkbox("Show Joining Data Steps", value=False)
-    
-    if show_joining_steps:
-        # Display the steps for joining the data
-        st.subheader("Joining Data Steps:")
-        
-        # Joining Data
-        merged_data_step1 = pd.merge(retailer, brands, on='BRAND', how='inner')
-        st.text("Merged Data - Step 1:")
-        st.dataframe(merged_data_step1)
-
-        merged_data_step2 = pd.merge(merged_data_step1, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='inner')
-        merged_data_step2 = merged_data_step2.drop('BRAND_BELONGS_TO_CATEGORY', axis=1)
-        st.text("Merged Data - Step 2:")
-        st.dataframe(merged_data_step2)
-
     # Display option to show data
     show_data = st.checkbox("Show Data")
     
@@ -82,14 +67,16 @@ if page == 'Data and Preprocessing':
         show_fillna_retailer = st.checkbox("Fill Missing Values in RETAILER column", value=False)
         if show_fillna_retailer:
             retailer['RETAILER'].fillna('Unknown', inplace=True)
-    
+            st.text("Filled missing values in the 'RETAILER' column.")
+
         # Convert to lowercase
         show_lowercase_conversion = st.checkbox("Convert to Lowercase", value=False)
         if show_lowercase_conversion:
             retailer = retailer.applymap(lambda x: x.lower() if type(x) == str else x)
             brands = brands.applymap(lambda x: x.lower() if type(x) == str else x)
             categories = categories.applymap(lambda x: x.lower() if type(x) == str else x)
-    
+            st.text("Converted all text to lowercase.")
+
         # Remove punctuation and handle common terms for PRODUCT_CATEGORY
         show_punctuation_removal_category = st.checkbox("Remove Punctuation and Handle Common Terms for PRODUCT_CATEGORY", value=False)
         if show_punctuation_removal_category:
@@ -97,44 +84,51 @@ if page == 'Data and Preprocessing':
             categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
             categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
             categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
-    
+            st.text("Removed punctuation and handled common terms for 'PRODUCT_CATEGORY'.")
+
         # Tokenization and Lemmatization for PRODUCT_CATEGORY
         show_lemmatization_category = st.checkbox("Tokenization and Lemmatization for PRODUCT_CATEGORY", value=False)
         if show_lemmatization_category:
             lemmatizer = WordNetLemmatizer()
             categories['PRODUCT_CATEGORY'] = categories['PRODUCT_CATEGORY'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
             categories['IS_CHILD_CATEGORY_TO'] = categories['IS_CHILD_CATEGORY_TO'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
-    
+            st.text("Performed tokenization and lemmatization for 'PRODUCT_CATEGORY'.")
+
         # Remove punctuation for BRAND
         show_punctuation_removal_brands = st.checkbox("Remove Punctuation for Brands", value=False)
         if show_punctuation_removal_brands:
             brands['BRAND'] = brands['BRAND'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
             brands['BRAND_BELONGS_TO_CATEGORY'] = brands['BRAND_BELONGS_TO_CATEGORY'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
-    
+            st.text("Removed punctuation for 'BRAND'.")
+
         # Remove noise and handle common terms for RETAILER
         show_common_terms_removal_retailer = st.checkbox("Remove Noise and Handle Common Terms for RETAILER", value=False)
         if show_common_terms_removal_retailer:
             retailer['RETAILER'] = retailer['RETAILER'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
             retailer['RETAILER'] = retailer['RETAILER'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
-    
+            st.text("Removed noise and handled common terms for 'RETAILER'.")
+
         # Remove noise and handle common terms for BRAND
         show_common_terms_removal_brands = st.checkbox("Remove Noise and Handle Common Terms for BRAND", value=False)
         if show_common_terms_removal_brands:
             retailer['BRAND'] = retailer['BRAND'].apply(lambda x: x.translate(str.maketrans('', '', string.punctuation)) if type(x) == str else x)
             retailer['BRAND'] = retailer['BRAND'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word.isalpha()]) if type(x) == str else x)
-    
+            st.text("Removed noise and handled common terms for 'BRAND'.")
+
         # Tokenization and Lemmatization for OFFER
         show_lemmatization_offer = st.checkbox("Tokenization and Lemmatization for OFFER", value=False)
         if show_lemmatization_offer:
             lemmatizer = WordNetLemmatizer()
             retailer['OFFER'] = retailer['OFFER'].apply(lambda x: ' '.join([lemmatizer.lemmatize(word) for word in word_tokenize(x)]) if type(x) == str else x)
-    
+            st.text("Performed tokenization and lemmatization for 'OFFER'.")
+
         # Remove stopwords for OFFER
         show_stopwords_removal_offer = st.checkbox("Remove Stopwords for OFFER", value=False)
         if show_stopwords_removal_offer:
             stop_words = set(stopwords.words('english'))
             retailer['OFFER'] = retailer['OFFER'].apply(lambda x: ' '.join([word for word in word_tokenize(x) if word not in stop_words]) if type(x) == str else x)
-    
+            st.text("Removed stopwords for 'OFFER'.")
+
         # Display the preprocessed data
         st.subheader("Preprocessed Data:")
         st.text("Preprocessed Retailer Data:")
@@ -143,6 +137,26 @@ if page == 'Data and Preprocessing':
         st.dataframe(brands.head())
         st.text("Preprocessed Categories Data:")
         st.dataframe(categories.head())
+
+        # Checkbox to show joining data steps
+        show_joining_data = st.checkbox("Show Joining Data Steps", value=False)
+
+        # Joining Data
+        if show_joining_data:
+            st.subheader("Joining Data Steps:")
+            
+            # Joining on 'BRAND'
+            merged_data = pd.merge(retailer, brands, on='BRAND', how='inner')
+            st.text("1. The inner join was used to merge the 'retailer' and 'brands' datasets based on the common 'BRAND' column. This type of join retains only the rows where there is a match in the 'BRAND' column between both datasets. The choice of an inner join was made to keep only the records that have corresponding 'BRAND' values in both datasets, ensuring that we have relevant information for the analysis.")
+
+            # Joining on 'BRAND_BELONGS_TO_CATEGORY'
+            merged_data = pd.merge(merged_data, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='inner')
+            merged_data = merged_data.drop('BRAND_BELONGS_TO_CATEGORY', axis=1)
+            st.text("2. Joined the above result with 'categories' dataset on 'BRAND_BELONGS_TO_CATEGORY' column.")
+            
+            # Display the merged data
+            st.subheader("Merged Data:")
+            st.dataframe(merged_data)
 
 
 # Model Page
