@@ -236,8 +236,11 @@ if page == 'Model':
         sorted_data = data.sort_values(by='Similarity Score', ascending=False)
 
         # Filter results based on user input criteria
-        filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower())]
+        if not sorted_data[input_column].isna().all():
+            filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower())]
 
-        # Display results
-        st.header('Top Similar Offers:')
-        st.dataframe(filtered_data[[input_column, 'OFFER', 'Similarity Score']])
+            # Display results
+            st.header('Top Similar Offers:')
+            st.dataframe(filtered_data[[input_column, 'OFFER', 'Similarity Score']])
+        else:
+            st.warning(f"No data available for {option}: {search_query}")
