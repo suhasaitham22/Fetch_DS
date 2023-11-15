@@ -10,6 +10,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.metrics.pairwise import cosine_similarity
 from fuzzywuzzy import fuzz
+from sklearn.metrics import jaccard_score
 
 # Download NLTK data
 nltk.download('punkt')
@@ -226,9 +227,6 @@ if page == 'Model':
         # Fill NaN values in the 'combined_text' column with an empty string
         data['combined_text'] = data['combined_text'].fillna('')
 
-        # Normalize words in 'OFFER' using fuzzy matching
-        data['combined_text'] = data['combined_text'].apply(lambda x: preprocess_text_fuzzy(x.lower(), search_query.lower()))
-
         # Exclude rows where 'OFFER' is empty or NaN
         data = data.dropna(subset=['OFFER'])
         data = data[data['OFFER'] != '']
@@ -240,28 +238,46 @@ if page == 'Model':
         # Transform the user input using the same vectorizer
         user_tfidf = vectorizer.transform([search_query])
 
-        # Calculate cosine similarity between user input and each offer
+        # Calculate Cosine similarity between user input and each offer
         cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
 
-        # Add the similarity scores to the data DataFrame
-        data['Similarity Score'] = cosine_similarities
+        # Calculate Jaccard similarity between user input and each offer
+        jaccard_similarities = linear_kernel(user_tfidf, tfidf_matrix).flatten()
 
-        # Sort offers based on similarity score
-        sorted_data = data.sort_values(by='Similarity Score', ascending=False)
+        # Add the similarity scores to the data DataFrame
+        data['Cosine Similarity'] = cosine_similarities
+        data['Jaccard Similarity'] = jaccard_similarities
+
+        # Set a default score for offers with zero similarity
+        default_score = 0.1  # Adjust as needed
+        data['Cosine Similarity'] = data['Cosine Similarity'].replace(0, default_score)
+        data['Jaccard Similarity'] = data['Jaccard Similarity'].replace(0, default_score)
+
+        # Sort offers based on both similarity scores
+        sorted_data_cosine = data.sort_values(by='Cosine Similarity', ascending=False)
+        sorted_data_jaccard = data.sort_values(by='Jaccard Similarity', ascending=False)
 
         # Filter results based on user input criteria
-        filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
+        filtered_data_cosine = sorted_data_cosine[sorted_data_cosine[input_column].str.lower().str.contains(search_query.lower(), na=False)]
+        filtered_data_jaccard = sorted_data_jaccard[sorted_data_jaccard[input_column].str.lower().str.contains(search_query.lower(), na=False)]
 
         # Display results only if there is a search query
         if search_query:
-            if not filtered_data.empty:
-                st.header('Top Similar Offers:')
-                st.dataframe(filtered_data[[input_column, 'OFFER', 'Similarity Score']])
+            if not filtered_data_cosine.empty:
+                st.header('Top Similar Offers (Cosine Similarity):')
+                st.dataframe(filtered_data_cosine[[input_column, 'OFFER', 'Cosine Similarity']])
             else:
-                st.info(f"No offers found for the given search query: '{search_query}'.")
-                check_future_offers = st.checkbox("Check for offers in the future")
+                st.info(f"No offers found for the given search query (Cosine Similarity): '{search_query}'.")
 
-                if check_future_offers:
-                    st.info("Checking for future offers... (This functionality is not yet implemented)")
+            if not filtered_data_jaccard.empty:
+                st.header('Top Similar Offers (Jaccard Similarity):')
+                st.dataframe(filtered_data_jaccard[[input_column, 'OFFER', 'Jaccard Similarity']])
+            else:
+                st.info(f"No offers found for the given search query (Jaccard Similarity): '{search_query}'.")
+
+            check_future_offers = st.checkbox("Check for offers in the future")
+
+            if check_future_offers:
+                st.info("Checking for future offers... (This functionality is not yet implemented)")
         else:
             st.info("Enter a search query to view results.")
