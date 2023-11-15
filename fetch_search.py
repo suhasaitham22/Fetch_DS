@@ -24,6 +24,8 @@ if page == 'Home':
 # Data and Preprocessing Page
 if page == 'Data and Preprocessing':
     st.title("Data and Preprocessing Page")
+    
+    st.write("For this task, I have used three datasets: 'brands', 'categories', and 'retailer'.")
 
     # Load additional datasets
     brands = pd.read_csv('brand_category.csv')
@@ -39,14 +41,6 @@ if page == 'Data and Preprocessing':
         st.text(f"Brands: {brands.shape}")
         st.text(f"Categories: {categories.shape}")
         st.text(f"Retailer: {retailer.shape}")
-
-        st.subheader("Info of Datasets")
-        st.text("Brands:")
-        st.text(brands.info())
-        st.text("Categories:")
-        st.text(categories.info())
-        st.text("Retailer:")
-        st.text(retailer.info())
 
         # Display sample data
         st.subheader("Sample Data:")
