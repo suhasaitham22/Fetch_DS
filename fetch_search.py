@@ -6,7 +6,7 @@ import ssl
 
 # Download NLTK data
 nltk.download('punkt')
-nltk.download('wordnet', download_dir='/home/appuser/nltk_data')
+nltk.download('wordnet')
 nltk.download('stopwords')
 
 # Import NLTK components after downloading data
