@@ -204,7 +204,7 @@ def preprocess_text_fuzzy(text, target):
 
 # Model Page
 if page == 'Model':
-    st.title("Model Page")
+    st.title("Offer Similarity Analysis from Brands, Category, Retailer Search")
 
     # Add a selection bar for choosing the model
     selected_model = st.sidebar.radio("Select Model:", ("TF-IDF", "Neural Networks"))
