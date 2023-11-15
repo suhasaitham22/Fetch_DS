@@ -37,6 +37,23 @@ if page == 'Data and Preprocessing':
     categories = pd.read_csv('categories.csv')
     retailer = pd.read_csv('offer_retailer.csv')
 
+    # Checkbox to display joining data steps
+    show_joining_steps = st.checkbox("Show Joining Data Steps", value=False)
+    
+    if show_joining_steps:
+        # Display the steps for joining the data
+        st.subheader("Joining Data Steps:")
+        
+        # Joining Data
+        merged_data_step1 = pd.merge(retailer, brands, on='BRAND', how='inner')
+        st.text("Merged Data - Step 1:")
+        st.dataframe(merged_data_step1)
+
+        merged_data_step2 = pd.merge(merged_data_step1, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='inner')
+        merged_data_step2 = merged_data_step2.drop('BRAND_BELONGS_TO_CATEGORY', axis=1)
+        st.text("Merged Data - Step 2:")
+        st.dataframe(merged_data_step2)
+
     # Display option to show data
     show_data = st.checkbox("Show Data")
     
