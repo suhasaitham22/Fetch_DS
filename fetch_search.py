@@ -187,6 +187,11 @@ if page == 'Data and Preprocessing':
         st.subheader("Merged Data:")
         st.dataframe(merged_data)
 
+# Function to preprocess text
+def preprocess_text(text):
+    # Tokenize, convert to lowercase, remove punctuation
+    return ' '.join(word_tokenize(text.lower()) if type(text) == str else text)
+
 # Model Page
 if page == 'Model':
     st.title("Model Page")
@@ -216,9 +221,9 @@ if page == 'Model':
         data = data.dropna(subset=['OFFER'])
         data = data[data['OFFER'] != '']
 
-        # Normalize words (convert to lowercase, remove punctuation, etc.)
-        data['combined_text'] = data['combined_text'].apply(lambda x: ' '.join(word_tokenize(x.lower()) if type(x) == str else x))
-        search_query = ' '.join(word_tokenize(search_query.lower()))
+        # Normalize words in 'OFFER' and search_query
+        data['combined_text'] = data['combined_text'].apply(preprocess_text)
+        search_query = preprocess_text(search_query)
 
         # Create a TF-IDF vectorizer
         vectorizer = TfidfVectorizer()
@@ -252,7 +257,3 @@ if page == 'Model':
                     st.info("Checking for future offers... (This functionality is not yet implemented)")
         else:
             st.info("Enter a search query to view results.")
-
-
-
-
