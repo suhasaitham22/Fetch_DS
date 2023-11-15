@@ -212,6 +212,13 @@ if page == 'Model':
         # Fill NaN values in the 'combined_text' column with an empty string
         data['combined_text'] = data['combined_text'].fillna('')
 
+        # Exclude rows where 'OFFER' is empty or NaN
+        data = data[data['OFFER'].notna() & (data['OFFER'] != '')]
+
+        # Normalize words (convert to lowercase, remove punctuation, etc.)
+        data['combined_text'] = data['combined_text'].apply(lambda x: ' '.join(word_tokenize(x.lower()) if type(x) == str else x))
+        search_query = ' '.join(word_tokenize(search_query.lower()))
+
         # Create a TF-IDF vectorizer
         vectorizer = TfidfVectorizer()
         tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
@@ -229,9 +236,8 @@ if page == 'Model':
         sorted_data = data.sort_values(by='Similarity Score', ascending=False)
 
         # Filter results based on user input criteria
-        filtered_data = sorted_data[sorted_data[input_column].str.lower() == search_query.lower()]
+        filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower())]
 
         # Display results
         st.header('Top Similar Offers:')
         st.dataframe(filtered_data[[input_column, 'OFFER', 'Similarity Score']])
-
