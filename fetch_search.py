@@ -248,32 +248,19 @@ if page == 'Model':
         data['Cosine Similarity'] = cosine_similarities
         data['Jaccard Similarity'] = jaccard_similarities
 
-        # Set a default score for offers with zero similarity
-        default_score = 0.1  # Adjust as needed
-        data['Cosine Similarity'] = data['Cosine Similarity'].replace(0, default_score)
-        data['Jaccard Similarity'] = data['Jaccard Similarity'].replace(0, default_score)
-
-        # Sort offers based on both similarity scores
-        sorted_data_cosine = data.sort_values(by='Cosine Similarity', ascending=False)
-        sorted_data_jaccard = data.sort_values(by='Jaccard Similarity', ascending=False)
+        # Combine both similarity scores in one DataFrame
+        sorted_data = data.sort_values(by=['Cosine Similarity', 'Jaccard Similarity'], ascending=False)
 
         # Filter results based on user input criteria
-        filtered_data_cosine = sorted_data_cosine[sorted_data_cosine[input_column].str.lower().str.contains(search_query.lower(), na=False)]
-        filtered_data_jaccard = sorted_data_jaccard[sorted_data_jaccard[input_column].str.lower().str.contains(search_query.lower(), na=False)]
+        filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
 
         # Display results only if there is a search query
         if search_query:
-            if not filtered_data_cosine.empty:
-                st.header('Top Similar Offers (Cosine Similarity):')
-                st.dataframe(filtered_data_cosine[[input_column, 'OFFER', 'Cosine Similarity']])
+            if not filtered_data.empty:
+                st.header('Top Similar Offers:')
+                st.dataframe(filtered_data[[input_column, 'OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
             else:
-                st.info(f"No offers found for the given search query (Cosine Similarity): '{search_query}'.")
-
-            if not filtered_data_jaccard.empty:
-                st.header('Top Similar Offers (Jaccard Similarity):')
-                st.dataframe(filtered_data_jaccard[[input_column, 'OFFER', 'Jaccard Similarity']])
-            else:
-                st.info(f"No offers found for the given search query (Jaccard Similarity): '{search_query}'.")
+                st.info(f"No offers found for the given search query: '{search_query}'.")
 
             check_future_offers = st.checkbox("Check for offers in the future")
 
