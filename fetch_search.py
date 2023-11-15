@@ -226,9 +226,8 @@ if page == 'Model':
         # Fill NaN values in the 'combined_text' column with an empty string
         data['combined_text'] = data['combined_text'].fillna('')
 
-        # Normalize words in 'OFFER' and search_query using fuzzy matching
-        data['combined_text'] = preprocess_user_input(search_query, 'combined_text')
-        search_query = preprocess_user_input(search_query, input_column)
+        # Normalize words in 'OFFER' using fuzzy matching
+        data['combined_text'] = data['combined_text'].apply(lambda x: preprocess_text_fuzzy(x.lower(), search_query.lower()))
 
         # Exclude rows where 'OFFER' is empty or NaN
         data = data.dropna(subset=['OFFER'])
@@ -239,7 +238,7 @@ if page == 'Model':
         tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
 
         # Transform the user input using the same vectorizer
-        user_tfidf = vectorizer.transform([search_query.iloc[0]])
+        user_tfidf = vectorizer.transform([search_query])
 
         # Calculate cosine similarity between user input and each offer
         cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
