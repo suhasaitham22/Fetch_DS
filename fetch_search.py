@@ -175,7 +175,7 @@ if page == 'Data and Preprocessing':
         st.subheader("Joining Data Steps:")
         
         # Joining on 'BRAND'
-        merged_data = pd.merge(retailer, brands, on='BRAND', how='inner')
+        merged_data = pd.merge(retailer, brands, on='BRAND', how='outer')
         st.text("1. Performed an inner join between 'retailer' and 'brands' datasets on the 'BRAND' column. This type of join retains only the rows where there is a match in the 'BRAND' column between both datasets. The choice of an inner join was made to keep only the records that have corresponding 'BRAND' values in both datasets, ensuring that we have relevant information for the analysis.")
 
         # Joining on 'BRAND_BELONGS_TO_CATEGORY'
@@ -239,9 +239,10 @@ if page == 'Model':
         # Filter results based on user input criteria
         filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
 
-        # Display results only if there is a search query
-        if search_query:
+        # Display results or a message if no offers are found
+        if not filtered_data.empty:
             st.header('Top Similar Offers:')
             st.dataframe(filtered_data[[input_column, 'OFFER', 'Similarity Score']])
         else:
-            st.info("Enter a search query to view results.")
+            st.info(f"No offers found for the given search query: '{search_query}'.")
+            st.checkbox("Check for offers in the future")
