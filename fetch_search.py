@@ -213,7 +213,7 @@ if page == 'Model':
         data['combined_text'] = data['combined_text'].fillna('')
 
         # Create a TF-IDF vectorizer
-        vectorizer = TfidfVectorizer(stop_words='english')
+        vectorizer = TfidfVectorizer()
         tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
 
         # Transform the user input using the same vectorizer
@@ -234,3 +234,4 @@ if page == 'Model':
         # Display results
         st.header('Top Similar Offers:')
         st.dataframe(filtered_data[[input_column, 'OFFER', 'Similarity Score']])
+
