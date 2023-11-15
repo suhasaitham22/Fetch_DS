@@ -202,78 +202,88 @@ def preprocess_text_fuzzy(text, target):
         return target
     return text
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics import jaccard_score
-
 # Model Page
 if page == 'Model':
     st.title("Model Page")
 
-    # Select option from brand, category, or retailer
-    option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
+    # Add a selection bar for choosing the model
+    selected_model = st.sidebar.radio("Select Model:", ("TF-IDF", "Neural Networks"))
 
-    # Display search bar based on the selected option
-    if option:
-        search_query = st.text_input(f"Enter {option} for search:")
+    # TF-IDF Model
+    if selected_model == "TF-IDF":
+        # Select option from brand, category, or retailer
+        option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
 
-        # Apply model based on user input
-        if option == 'Brand':
-            input_column = 'BRAND'
-        elif option == 'Category':
-            input_column = 'PRODUCT_CATEGORY'
-        elif option == 'Retailer':
-            input_column = 'RETAILER'
+        # Display search bar based on the selected option
+        if option:
+            search_query = st.text_input(f"Enter {option} for search:")
 
-        # Use only the 'OFFER' column for text similarity calculation
-        data['combined_text'] = data['OFFER']
+            # Apply model based on user input
+            if option == 'Brand':
+                input_column = 'BRAND'
+            elif option == 'Category':
+                input_column = 'PRODUCT_CATEGORY'
+            elif option == 'Retailer':
+                input_column = 'RETAILER'
 
-        # Fill NaN values in the 'combined_text' column with an empty string
-        data['combined_text'] = data['combined_text'].fillna('')
+            # Use only the 'OFFER' column for text similarity calculation
+            data['combined_text'] = data['OFFER']
 
-        # Exclude rows where 'OFFER' is empty or NaN
-        data = data.dropna(subset=['OFFER'])
-        data = data[data['OFFER'] != '']
+            # Fill NaN values in the 'combined_text' column with an empty string
+            data['combined_text'] = data['combined_text'].fillna('')
 
-        # Create a TF-IDF vectorizer
-        vectorizer = TfidfVectorizer()
-        tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
+            # Exclude rows where 'OFFER' is empty or NaN
+            data = data.dropna(subset=['OFFER'])
+            data = data[data['OFFER'] != '']
 
-        # Transform the user input using the same vectorizer
-        user_tfidf = vectorizer.transform([search_query])
+            # Create a TF-IDF vectorizer
+            vectorizer = TfidfVectorizer()
+            tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
 
-        # Calculate Cosine similarity between user input and each offer
-        cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
+            # Transform the user input using the same vectorizer
+            user_tfidf = vectorizer.transform([search_query])
 
-        # Calculate Jaccard similarity between user input and each offer
-        jaccard_similarities = []
-        for offer_text in data['combined_text']:
-            offer_words = set(offer_text.split())
-            user_words = set(search_query.split())
-            jaccard = len(offer_words.intersection(user_words)) / len(offer_words.union(user_words))
-            jaccard_similarities.append(jaccard)
+            # Calculate Cosine similarity between user input and each offer
+            cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
 
-        # Add the similarity scores to the data DataFrame
-        data['Cosine Similarity'] = cosine_similarities
-        data['Jaccard Similarity'] = jaccard_similarities
+            # Calculate Jaccard similarity between user input and each offer
+            jaccard_similarities = []
+            for offer_text in data['combined_text']:
+                offer_words = set(offer_text.split())
+                user_words = set(search_query.split())
+                jaccard = len(offer_words.intersection(user_words)) / len(offer_words.union(user_words))
+                jaccard_similarities.append(jaccard)
 
-        # Sort offers based on both similarity scores
-        sorted_data = data.sort_values(by=['Cosine Similarity', 'Jaccard Similarity'], ascending=False)
+            # Add the similarity scores to the data DataFrame
+            data['Cosine Similarity'] = cosine_similarities
+            data['Jaccard Similarity'] = jaccard_similarities
 
-        # Filter results based on user input criteria
-        filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
+            # Sort offers based on both similarity scores
+            sorted_data = data.sort_values(by=['Cosine Similarity', 'Jaccard Similarity'], ascending=False)
 
-        # Display results only if there is a search query
-        if search_query:
-            if not filtered_data.empty:
-                st.header('Top Similar Offers:')
-                st.dataframe(filtered_data[[input_column, 'OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
+            # Filter results based on user input criteria
+            filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
+
+            # Display results only if there is a search query
+            if search_query:
+                if not filtered_data.empty:
+                    st.header('Top Similar Offers:')
+                    st.dataframe(filtered_data[[input_column, 'OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
+                else:
+                    st.info(f"No offers found for the given search query: '{search_query}'.")
+
+                check_future_offers = st.checkbox("Check for offers in the future")
+
+                if check_future_offers:
+                    st.info("Checking for future offers... (This functionality is not yet implemented)")
             else:
-                st.info(f"No offers found for the given search query: '{search_query}'.")
+                st.info("Enter a search query to view results.")
 
-            check_future_offers = st.checkbox("Check for offers in the future")
+    # Neural Networks Model
+    elif selected_model == "Neural Networks":
+        # Your Neural Networks model code here
 
-            if check_future_offers:
-                st.info("Checking for future offers... (This functionality is not yet implemented)")
-        else:
-            st.info("Enter a search query to view results.")
+        # For example:
+        st.title("Neural Networks Model")
+        st.write("This section is dedicated to the Neural Networks model.")
+        # Add your Neural Networks model code and functionalities here
