@@ -207,7 +207,7 @@ if page == 'Model':
     st.title("Model Page")
 
     # Add a selection bar for choosing the model
-    selected_model = st.sidebar.radio("Select Model:", ("TF-IDF", "Neural Networks"))
+    selected_model = st.selectbox("Select Model:", ("TF-IDF", "Neural Networks"))
 
     # TF-IDF Model
     if selected_model == "TF-IDF":
