@@ -28,6 +28,31 @@ if page == 'Home':
     st.title("Home Page")
     st.write("Welcome! This application performs data preprocessing and allows you to search for similar offers using a model.")
 
+    # Add a summary of the task and solution approach
+    st.subheader("Task Summary:")
+    st.write("The goal of this task is to build a tool for intelligent searching of offers via text input. "
+             "Users can search for categories, brands, or retailers, and the tool returns relevant offers with similarity scores.")
+
+    st.subheader("Solution Approach:")
+    st.write("To achieve this, we performed the following steps:")
+    st.markdown("1. **Data Preprocessing:** Cleaned and processed data, including filling missing values, converting to lowercase, removing punctuation, and handling common terms.")
+    st.markdown("2. **Joining Data:** Merged 'retailer' and 'brands' datasets on 'BRAND' column, then joined the result with 'categories' dataset on 'BRAND_BELONGS_TO_CATEGORY' column.")
+    st.markdown("3. **Modeling (Pending):** Implement a model to intelligently search and return relevant offers based on user input.")
+
+    # Add a section about why you are interested in Fetch Rewards and your strengths
+    st.subheader("Why Fetch Rewards?")
+    st.write("I am particularly interested in Fetch Rewards because of its commitment to innovation in the consumer-engagement space. "
+             "The hybrid-remote workplace and focus on rewarding shoppers align with my passion for leveraging data science to create meaningful experiences.")
+
+    st.subheader("Why Me?")
+    st.write("As a data scientist specializing in NLP and ML, I bring a unique set of skills and experiences:")
+    st.markdown("- Proven track record in NLP project development, collaboration, and ML tools.")
+    st.markdown("- Experience in extracting valuable information from multimedia using tools like Dexer.")
+    st.markdown("- Strong analytical and predictive modeling skills, as demonstrated in previous roles.")
+
+    st.subheader("Get Started:")
+    st.write("Navigate to 'Data and Preprocessing' to explore the processed data and 'Model' to start searching for offers.")
+
 # Data and Preprocessing Page
 if page == 'Data and Preprocessing':
     st.title("Data and Preprocessing Page")
