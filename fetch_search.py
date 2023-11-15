@@ -188,17 +188,11 @@ if page == 'Data and Preprocessing':
         st.subheader("Merged Data:")
         st.dataframe(merged_data)
 
-# Function to preprocess text using fuzzy matching
-def preprocess_text_fuzzy(text, target):
-    # Check similarity using fuzzy matching
-    if fuzz.ratio(text, target) >= 50:
-        return target
-    return text
 
 # Function to preprocess user input using fuzzy matching
 def preprocess_user_input(user_input, target_column):
     # Check similarity using fuzzy matching
-    return data[target_column].apply(lambda x: preprocess_text_fuzzy(x.lower(), user_input.lower()))
+    return data[target_column].apply(lambda x: preprocess_text_fuzzy(str(x).lower() if pd.notna(x) else '', user_input.lower()))
 
 # Function to preprocess text using fuzzy matching
 def preprocess_text_fuzzy(text, target):
