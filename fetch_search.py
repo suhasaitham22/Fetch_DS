@@ -193,15 +193,29 @@ if page == 'Model':
     # Display search bar based on the selected option
     if option:
         search_query = st.text_input(f"Enter {option} for search:")
-        
-        # Filter data based on user input
+
+        # Apply model based on user input
         if option == 'Brand':
-            filtered_data = data[data['BRAND'].str.lower().str.contains(search_query.lower())]
+            input_column = 'BRAND'
         elif option == 'Category':
-            filtered_data = data[data['PRODUCT_CATEGORY'].str.lower().str.contains(search_query.lower())]
+            input_column = 'PRODUCT_CATEGORY'
         elif option == 'Retailer':
-            filtered_data = data[data['RETAILER'].str.lower().str.contains(search_query.lower())]
+            input_column = 'RETAILER'
+
+        # TF-IDF Vectorization
+        tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = tfidf_vectorizer.fit_transform(processed_data[input_column])
+
+        # User input vectorization
+        user_query_vector = tfidf_vectorizer.transform([search_query])
+
+        # Compute similarity scores
+        similarity_scores = linear_kernel(user_query_vector, tfidf_matrix).flatten()
+
+        # Sort offers by similarity score
+        processed_data['Similarity Score'] = similarity_scores
+        sorted_data = processed_data.sort_values(by='Similarity Score', ascending=False)
 
         # Display results
         st.header('Top Similar Offers:')
-        st.dataframe(filtered_data)
+        st.dataframe(sorted_data[[input_column, 'OFFER', 'Similarity Score']])
