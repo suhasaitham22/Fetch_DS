@@ -147,7 +147,9 @@ if page == 'Data and Preprocessing':
         
         # Joining on 'BRAND'
         merged_data = pd.merge(retailer, brands, on='BRAND', how='inner')
-        st.text("1. Performed an inner join between 'retailer' and 'brands' datasets on the 'BRAND' column. This type of join retains only the rows where there is a match in the 'BRAND' column between both datasets. The choice of an inner join was made to keep only the records that have corresponding 'BRAND' values in both datasets, ensuring that we have relevant information for the analysis.")
+        st.text("1. Performed an inner join between 'retailer' and 'brands' datasets on the 'BRAND' column. This type of join retains only the rows 
+        where there is a match in the 'BRAND' column between both datasets. The choice of an inner join was made to keep only the records that have 
+        corresponding 'BRAND' values in both datasets, ensuring that we have relevant information for the analysis.")
 
         # Joining on 'BRAND_BELONGS_TO_CATEGORY'
         merged_data = pd.merge(merged_data, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='inner')
