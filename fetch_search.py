@@ -4,12 +4,9 @@ import string
 import nltk
 import ssl
 
-# Set the NLTK data path
-nltk.data.path.append("/home/appuser/nltk_data")
-
 # Download NLTK data
 nltk.download('punkt')
-nltk.download('wordnet')
+nltk.download('wordnet', download_dir='/home/appuser/nltk_data')
 nltk.download('stopwords')
 
 # Import NLTK components after downloading data
