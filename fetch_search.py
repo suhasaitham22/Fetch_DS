@@ -40,7 +40,7 @@ if page == 'Data and Preprocessing':
     retailer = pd.read_csv('offer_retailer.csv')
 
     # Display option to show data
-    show_data = st.checkbox("Show Data")
+    show_data = st.checkbox("**Show Data**")
     
     if show_data:
         # Display shapes and info of the datasets
@@ -59,7 +59,7 @@ if page == 'Data and Preprocessing':
         st.dataframe(retailer.head())
 
     # Ask user if they want to see preprocessing steps
-    show_preprocessing = st.checkbox("Show Preprocessing Steps", value=False)
+    show_preprocessing = st.checkbox("**Show Preprocessing Steps**", value=False)
     
     # Preprocessing Data
     if show_preprocessing:
@@ -139,7 +139,7 @@ if page == 'Data and Preprocessing':
         st.dataframe(categories.head())
 
     # Checkbox to show joining data steps
-    show_joining_data = st.checkbox("Show Joining Data Steps", value=False)
+    show_joining_data = st.checkbox("**Show Joining Data Steps**", value=False)
 
     # Joining Data
     if show_joining_data:
