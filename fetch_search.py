@@ -202,6 +202,10 @@ def preprocess_text_fuzzy(text, target):
         return target
     return text
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import jaccard_score
+
 # Model Page
 if page == 'Model':
     st.title("Model Page")
@@ -242,13 +246,18 @@ if page == 'Model':
         cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
 
         # Calculate Jaccard similarity between user input and each offer
-        jaccard_similarities = linear_kernel(user_tfidf, tfidf_matrix).flatten()
+        jaccard_similarities = []
+        for offer_text in data['combined_text']:
+            offer_words = set(offer_text.split())
+            user_words = set(search_query.split())
+            jaccard = len(offer_words.intersection(user_words)) / len(offer_words.union(user_words))
+            jaccard_similarities.append(jaccard)
 
         # Add the similarity scores to the data DataFrame
         data['Cosine Similarity'] = cosine_similarities
         data['Jaccard Similarity'] = jaccard_similarities
 
-        # Combine both similarity scores in one DataFrame
+        # Sort offers based on both similarity scores
         sorted_data = data.sort_values(by=['Cosine Similarity', 'Jaccard Similarity'], ascending=False)
 
         # Filter results based on user input criteria
