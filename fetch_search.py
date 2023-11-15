@@ -6,6 +6,7 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
 
 # Download NLTK data
 nltk.download('punkt')
@@ -217,6 +218,9 @@ if page == 'Model':
         processed_data['Similarity Score'] = similarity_scores
         sorted_data = processed_data.sort_values(by='Similarity Score', ascending=False)
 
+        # Filter results based on user input criteria
+        filtered_data = sorted_data[sorted_data[input_column].str.lower() == search_query.lower()]
+
         # Display results
         st.header('Top Similar Offers:')
-        st.dataframe(sorted_data[[input_column, 'OFFER', 'Similarity Score']])
+        st.dataframe(filtered_data[[input_column, 'OFFER', 'Similarity Score']])
