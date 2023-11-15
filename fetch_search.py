@@ -185,7 +185,7 @@ if page == 'Data and Preprocessing':
         st.subheader("Merged Data:")
         st.dataframe(merged_data)
 
-# Model Page# Model Page
+# Model Page
 if page == 'Model':
     st.title("Model Page")
 
@@ -205,14 +205,14 @@ if page == 'Model':
             input_column = 'RETAILER'
 
         # Use only the 'OFFER' column for text similarity calculation
-        merged_data['combined_text'] = merged_data['OFFER']
+        data['combined_text'] = data['OFFER']
 
         # Fill NaN values in the 'combined_text' column with an empty string
-        merged_data['combined_text'] = merged_data['combined_text'].fillna('')
+        data['combined_text'] = data['combined_text'].fillna('')
 
         # Create a TF-IDF vectorizer
         vectorizer = TfidfVectorizer(stop_words='english')
-        tfidf_matrix = vectorizer.fit_transform(merged_data['combined_text'])
+        tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
 
         # Transform the user input using the same vectorizer
         user_tfidf = vectorizer.transform([search_query])
@@ -220,11 +220,11 @@ if page == 'Model':
         # Calculate cosine similarity between user input and each offer
         cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
 
-        # Add the similarity scores to the merged_data DataFrame
-        merged_data['Similarity Score'] = cosine_similarities
+        # Add the similarity scores to the data DataFrame
+        data['Similarity Score'] = cosine_similarities
 
         # Sort offers based on similarity score
-        sorted_data = merged_data.sort_values(by='Similarity Score', ascending=False)
+        sorted_data = data.sort_values(by='Similarity Score', ascending=False)
 
         # Filter results based on user input criteria
         filtered_data = sorted_data[sorted_data[input_column].str.lower() == search_query.lower()]
