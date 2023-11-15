@@ -239,7 +239,7 @@ if page == 'Model':
         tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
 
         # Transform the user input using the same vectorizer
-        user_tfidf = vectorizer.transform([search_query])
+        user_tfidf = vectorizer.transform([search_query.iloc[0]])
 
         # Calculate cosine similarity between user input and each offer
         cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
