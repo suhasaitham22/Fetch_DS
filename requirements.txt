@@ -11,7 +11,6 @@ streamlit==1.9.0
 tensorflow==2.8.0
 termcolor==1.1.0
 textblob==0.15.3
-wordcloud==1.8.2
 scikit-learn>=0.18
 scipy>=0.15.1
 sklearn
