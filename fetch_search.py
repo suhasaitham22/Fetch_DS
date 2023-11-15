@@ -195,6 +195,18 @@ def preprocess_text_fuzzy(text, target):
         return target
     return text
 
+# Function to preprocess user input using fuzzy matching
+def preprocess_user_input(user_input, target_column):
+    # Check similarity using fuzzy matching
+    return data[target_column].apply(lambda x: preprocess_text_fuzzy(x.lower(), user_input.lower()))
+
+# Function to preprocess text using fuzzy matching
+def preprocess_text_fuzzy(text, target):
+    # Check similarity using fuzzy matching
+    if fuzz.ratio(text, target) >= 50:
+        return target
+    return text
+
 # Model Page
 if page == 'Model':
     st.title("Model Page")
@@ -220,13 +232,13 @@ if page == 'Model':
         # Fill NaN values in the 'combined_text' column with an empty string
         data['combined_text'] = data['combined_text'].fillna('')
 
+        # Normalize words in 'OFFER' and search_query using fuzzy matching
+        data['combined_text'] = preprocess_user_input(search_query, 'combined_text')
+        search_query = preprocess_user_input(search_query, input_column)
+
         # Exclude rows where 'OFFER' is empty or NaN
         data = data.dropna(subset=['OFFER'])
         data = data[data['OFFER'] != '']
-
-        # Normalize words in 'OFFER' and search_query using fuzzy matching
-        data['combined_text'] = data['combined_text'].apply(lambda x: preprocess_text_fuzzy(x.lower(), search_query.lower()))
-        search_query = preprocess_text_fuzzy(search_query.lower(), search_query.lower())
 
         # Create a TF-IDF vectorizer
         vectorizer = TfidfVectorizer()
@@ -255,7 +267,7 @@ if page == 'Model':
             else:
                 st.info(f"No offers found for the given search query: '{search_query}'.")
                 check_future_offers = st.checkbox("Check for offers in the future")
-        
+
                 if check_future_offers:
                     st.info("Checking for future offers... (This functionality is not yet implemented)")
         else:
