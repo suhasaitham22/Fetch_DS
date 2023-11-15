@@ -9,7 +9,7 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.metrics.pairwise import cosine_similarity
-
+from fuzzywuzzy import fuzz
 
 # Download NLTK data
 nltk.download('punkt')
@@ -188,11 +188,12 @@ if page == 'Data and Preprocessing':
         st.subheader("Merged Data:")
         st.dataframe(merged_data)
 
-# Function to preprocess text
-def preprocess_text(text):
-    # Remove special characters, tokenize, convert to lowercase
-    processed_text = re.sub(r'[^\w\s]', '', text)
-    return ' '.join(word_tokenize(processed_text.lower()) if type(processed_text) == str else processed_text)
+# Function to preprocess text using fuzzy matching
+def preprocess_text_fuzzy(text, target):
+    # Check similarity using fuzzy matching
+    if fuzz.ratio(text, target) >= 50:
+        return target
+    return text
 
 # Model Page
 if page == 'Model':
@@ -223,9 +224,9 @@ if page == 'Model':
         data = data.dropna(subset=['OFFER'])
         data = data[data['OFFER'] != '']
 
-        # Normalize words in 'OFFER' and search_query
-        data['combined_text'] = data['combined_text'].apply(preprocess_text)
-        search_query = preprocess_text(search_query)
+        # Normalize words in 'OFFER' and search_query using fuzzy matching
+        data['combined_text'] = data['combined_text'].apply(lambda x: preprocess_text_fuzzy(x.lower(), search_query.lower()))
+        search_query = preprocess_text_fuzzy(search_query.lower(), search_query.lower())
 
         # Create a TF-IDF vectorizer
         vectorizer = TfidfVectorizer()
