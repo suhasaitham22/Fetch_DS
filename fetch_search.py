@@ -314,6 +314,7 @@ if page == 'Model':
                     user_pred_original = scaler.inverse_transform(user_pred_absolute).flatten()
                 
                     # Call the function with all required arguments
+                    # Call the function with all required arguments
                     result_df = get_relevant_offers_for_retailer(
                         search_query.lower(),
                         data,  # Pass the 'data' variable
@@ -323,7 +324,6 @@ if page == 'Model':
                         model,  # Pass the 'model' variable
                         scaler  # Pass the 'scaler' variable
                     )
-                
                     # Filter offers for the specified retailer
                     result_df = result_df[result_df['RETAILER'].str.lower() == user_input_retailer.lower()]
                 
