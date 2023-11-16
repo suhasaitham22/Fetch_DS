@@ -224,6 +224,9 @@ def preprocess_text_fuzzy(text, target):
 def preprocess_offer_column(offer):
     return str(offer) if isinstance(offer, str) else ''
 
+def cos_sim(a, b):
+    return torch.nn.functional.cosine_similarity(a, b)
+    
 # Apply preprocessing to the 'OFFER' column
 data['OFFER'] = data['OFFER'].apply(preprocess_offer_column)
 # Model Page
