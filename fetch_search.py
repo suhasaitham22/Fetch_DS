@@ -272,7 +272,7 @@ if page == 'Model':
                 check_future_offers = st.checkbox("Check for offers in the future")
 
                 if check_future_offers:
-                    st.info("Checking for future offers... (This functionality is not yet implemented)")
+                    st.write("Thanks for checking! Please come back to view new offers soon.")
             else:
                 st.info("Dataset is empty or does not contain any valid offers.")
         else:
