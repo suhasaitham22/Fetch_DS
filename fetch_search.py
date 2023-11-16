@@ -231,17 +231,17 @@ def get_relevant_offers_for_retailer(user_input_retailer, data, tokenizer_offer,
 
     return result_df 
 
-# Model Page
-if page == 'Model':
+# Model Pageif page == 'Model':
     st.title("Offer Similarity Analysis from Brands, Category, Retailer Search")
 
-        # Select option from brand, category, or retailer
-        option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
+    # Select option from brand, category, or retailer
+    option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
 
-        # Display search bar based on the selected option
-        if option:
-            search_query = st.text_input(f"Enter {option} for search:")
+    # Display search bar based on the selected option
+    if option:
+        search_query = st.text_input(f"Enter {option} for search:")
 
+        if search_query:
             # Apply model based on user input
             if option == 'Brand':
                 input_column = 'BRAND'
@@ -260,39 +260,38 @@ if page == 'Model':
             data = data.dropna(subset=['OFFER'])
             data = data[data['OFFER'] != '']
 
-            # Create a TF-IDF vectorizer
-            vectorizer = TfidfVectorizer()
-            tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
+            if not data.empty:
+                # Create a TF-IDF vectorizer
+                vectorizer = TfidfVectorizer()
+                tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
 
-            # Transform the user input using the same vectorizer
-            user_tfidf = vectorizer.transform([search_query])
+                # Transform the user input using the same vectorizer
+                user_tfidf = vectorizer.transform([search_query])
 
-            # Calculate Cosine similarity between user input and each offer
-            cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
+                # Calculate Cosine similarity between user input and each offer
+                cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
 
-            # Calculate Jaccard similarity between user input and each offer
-            jaccard_similarities = []
-            for offer_text in data['combined_text']:
-                offer_words = set(offer_text.split())
-                user_words = set(search_query.split())
-                jaccard = len(offer_words.intersection(user_words)) / len(offer_words.union(user_words))
-                jaccard_similarities.append(jaccard)
+                # Calculate Jaccard similarity between user input and each offer
+                jaccard_similarities = []
+                for offer_text in data['combined_text']:
+                    offer_words = set(offer_text.split())
+                    user_words = set(search_query.split())
+                    jaccard = len(offer_words.intersection(user_words)) / len(offer_words.union(user_words))
+                    jaccard_similarities.append(jaccard)
 
-            # Add the similarity scores to the data DataFrame
-            data['Cosine Similarity'] = cosine_similarities
-            data['Jaccard Similarity'] = jaccard_similarities
+                # Add the similarity scores to the data DataFrame
+                data['Cosine Similarity'] = cosine_similarities
+                data['Jaccard Similarity'] = jaccard_similarities
 
-            # Sort offers based on both similarity scores
-            sorted_data = data.sort_values(by=['Cosine Similarity', 'Jaccard Similarity'], ascending=False)
+                # Sort offers based on both similarity scores
+                sorted_data = data.sort_values(by=['Cosine Similarity', 'Jaccard Similarity'], ascending=False)
 
-            # Filter results based on user input criteria
-            filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
+                # Filter results based on user input criteria
+                filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
 
-            # Display results only if there is a search query
-            if search_query:
                 if not filtered_data.empty:
                     st.header('Top Similar Offers:')
-                    st.dataframe()
+                    st.dataframe(filtered_data)  # Display filtered results
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
 
@@ -301,4 +300,7 @@ if page == 'Model':
                 if check_future_offers:
                     st.info("Checking for future offers... (This functionality is not yet implemented)")
             else:
-                st.info("Enter a search query to view results.")
+                st.info("Dataset is empty or does not contain any valid offers.")
+        else:
+            st.info("Enter a search query to view results.")
+
