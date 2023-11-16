@@ -202,34 +202,6 @@ def preprocess_text_fuzzy(text, target):
     if fuzz.ratio(text, target) >= 50:
         return target
     return text
-    
-def get_relevant_offers_for_retailer(user_input_retailer, data, tokenizer_offer, tokenizer_retailer, tokenizer_brand, model, scaler):
-    user_input_sequence_retailer = tokenizer_retailer.texts_to_sequences([user_input_retailer])
-    user_input_sequence_retailer = pad_sequences(user_input_sequence_retailer, maxlen=X_retailer.shape[1])
-
-    user_input_sequence_retailer_broadcasted = np.repeat(user_input_sequence_retailer, X_offer.shape[0], axis=0)
-
-    user_pred = model.predict([X_offer, user_input_sequence_retailer_broadcasted, X_brand])
-
-    user_pred_absolute = np.abs(user_pred)
-
-    user_pred_original = scaler.inverse_transform(user_pred_absolute).flatten()
-
-    result_df = pd.DataFrame({
-        'OFFER': data['OFFER'],
-        'RETAILER': data['RETAILER'],
-        'BRAND': data['BRAND'],
-        'PRODUCT_CATEGORY': data['PRODUCT_CATEGORY'],
-        'predicted_score': user_pred_original
-    })
-
-    result_df = result_df[result_df['RETAILER'].str.lower() == user_input_retailer.lower()]
-
-    result_df = result_df.sort_values(by='predicted_score', ascending=False)
-
-    result_df.reset_index(drop=True, inplace=True)
-
-    return result_df 
 
 # Model Pageif page == 'Model':
     st.title("Offer Similarity Analysis from Brands, Category, Retailer Search")
@@ -303,4 +275,3 @@ def get_relevant_offers_for_retailer(user_input_retailer, data, tokenizer_offer,
                 st.info("Dataset is empty or does not contain any valid offers.")
         else:
             st.info("Enter a search query to view results.")
-
