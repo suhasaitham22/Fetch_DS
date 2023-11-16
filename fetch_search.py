@@ -178,26 +178,30 @@ if page == 'Data and Preprocessing':
         st.subheader("Joining Data Steps:")
         
         # Joining on 'BRAND'
-        merged_data = pd.merge(retailer, brands, on='BRAND', how='outer')
-        join_explanation = (
-            "1. In this step, an outer join operation was executed between the 'retailer' and 'brands' datasets using "
+        join_explanation_1 = (
+            "In this step, an outer join operation was executed between the 'retailer' and 'brands' datasets using "
             "the 'BRAND' column as the common identifier. An outer join combines all rows from both datasets, "
             "preserving all available information. This join type includes rows where 'BRAND' values may not have "
             "matching counterparts in both datasets, filling those instances with NaN (missing values). The rationale "
             "behind employing an outer join was to ensure comprehensive data inclusion for subsequent analysis, "
             "facilitating a complete and exhaustive overview of available records."
         )
-        st.text(join_explanation)
-
+        st.text(join_explanation_1)
+    
         # Joining on 'BRAND_BELONGS_TO_CATEGORY'
-        merged_data = pd.merge(merged_data, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='inner')
+        merged_data = pd.merge(merged_data, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='outer')
         merged_data = merged_data.drop('BRAND_BELONGS_TO_CATEGORY', axis=1)
-        st.text("2. Joined the above result with 'categories' dataset on 'BRAND_BELONGS_TO_CATEGORY' column.")
+        
+        join_explanation_2 = (
+            "In continuation, the resulting dataset from the previous step was further joined with the 'categories' dataset "
+            "based on the 'BRAND_BELONGS_TO_CATEGORY' column. This inner join was performed to consolidate additional "
+            "information and enrich the dataset for comprehensive analysis."
+        )
+        st.text(join_explanation_2)
         
         # Display the merged data
         st.subheader("Merged Data:")
         st.dataframe(merged_data)
-
 
 # Function to preprocess user input using fuzzy matching
 def preprocess_user_input(user_input, target_column):
