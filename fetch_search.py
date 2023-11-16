@@ -90,7 +90,8 @@ if page == 'Data and Preprocessing':
         st.dataframe(retailer.head())
 
     # Ask user if they want to see preprocessing steps
-    show_preprocessing = st.checkbox("**Show Preprocessing Steps**", value=False)
+    header1=st.subheader(Show Preprocessing Steps)
+    show_preprocessing = st.checkbox(header1, value=False)
     
     # Preprocessing Data
     if show_preprocessing:
