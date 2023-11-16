@@ -90,8 +90,7 @@ if page == 'Data and Preprocessing':
         st.dataframe(retailer.head())
 
     # Ask user if they want to see preprocessing steps
-    Toggle=st.markdown("**Show Preprocessing Steps**")
-    show_preprocessing = st.checkbox(Toggle, value=False)
+    show_preprocessing = st.checkbox(st.markdown("**Show Preprocessing Steps**"), value=False)
     
     # Preprocessing Data
     if show_preprocessing:
