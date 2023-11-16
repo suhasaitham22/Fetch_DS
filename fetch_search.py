@@ -268,7 +268,7 @@ if page == 'Model':
             if search_query:
                 if not filtered_data.empty:
                     st.header('Top Similar Offers:')
-                    st.dataframe(filtered_data[[input_column, 'OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
+                    st.dataframe()
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
 
@@ -300,6 +300,17 @@ if page == 'Model':
     
             # Your Neural Networks model code here
     
-            # For example:
-            st.write("Your Neural Networks model interface goes here.")
-            # Add your Neural Networks model code and functionalities here
+            # Display results only if there is a search query
+            if search_query:
+                if not filtered_data.empty:
+                    st.header('Top Similar Offers:')
+                    st.dataframe()
+                else:
+                    st.info(f"No offers found for the given search query: '{search_query}'.")
+
+                check_future_offers = st.checkbox("Check for offers in the future")
+
+                if check_future_offers:
+                    st.info("Checking for future offers... (This functionality is not yet implemented)")
+            else:
+                st.info("Enter a search query to view results.")
