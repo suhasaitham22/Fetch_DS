@@ -33,7 +33,7 @@ page = st.sidebar.radio("Go to", ('Home', 'Data and Preprocessing', 'Model'))
 # Home Page
 if page == 'Home':
     st.title("Home Page")
-    st.write("Welcome! This application performs data preprocessing and allows you to search for similar offers using a model.")
+    st.write("Welcome! This application performs data preprocessing and allows you to search for similar offers using a TF-IDF model.")
 
     # Add a summary of the task and solution approach
     st.subheader("Task Summary:")
@@ -44,7 +44,7 @@ if page == 'Home':
     st.write("To achieve this, we performed the following steps:")
     st.markdown("1. **Data Preprocessing:** Cleaned and processed data, including filling missing values, converting to lowercase, removing punctuation, and handling common terms.")
     st.markdown("2. **Joining Data:** Merged 'retailer' and 'brands' datasets on 'BRAND' column, then joined the result with 'categories' dataset on 'BRAND_BELONGS_TO_CATEGORY' column.")
-    st.markdown("3. **Modeling (Pending):** Implement a model to intelligently search and return relevant offers based on user input.")
+    st.markdown("3. **Modeling:** Implemented a model that intelligently searches and retrieves relevant offers based on user input. The model utilizes TF-IDF vectorization, Cosine Similarity, and Jaccard Similarity to analyze text data and generate similarity scores. It effectively sorts and filters offers to present the most relevant matches to the user's search query.")
 
     # Add a section about why you are interested in Fetch Rewards and your strengths
     st.subheader("Why Fetch Rewards?")
@@ -179,7 +179,15 @@ if page == 'Data and Preprocessing':
         
         # Joining on 'BRAND'
         merged_data = pd.merge(retailer, brands, on='BRAND', how='outer')
-        st.text("1. Performed an outer join between 'retailer' and 'brands' datasets on the 'BRAND' column. This type of join includes all rows from both datasets, filling in missing values with NaN for rows that do not have corresponding 'BRAND' values in both datasets. The choice of an outer join was made to retain all available records, ensuring comprehensive information for the analysis.")
+        join_explanation = (
+            "1. In this step, an outer join operation was executed between the 'retailer' and 'brands' datasets using "
+            "the 'BRAND' column as the common identifier. An outer join combines all rows from both datasets, "
+            "preserving all available information. This join type includes rows where 'BRAND' values may not have "
+            "matching counterparts in both datasets, filling those instances with NaN (missing values). The rationale "
+            "behind employing an outer join was to ensure comprehensive data inclusion for subsequent analysis, "
+            "facilitating a complete and exhaustive overview of available records."
+        )
+        st.text(join_explanation)
 
         # Joining on 'BRAND_BELONGS_TO_CATEGORY'
         merged_data = pd.merge(merged_data, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='inner')
