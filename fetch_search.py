@@ -263,8 +263,9 @@ if page == 'Model':
                 filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
 
                 if not filtered_data.empty:
+                    # Display only the selected columns
                     st.header('Top Similar Offers:')
-                    st.dataframe(filtered_data)  # Display filtered results
+                    st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
 
