@@ -13,6 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from fuzzywuzzy import fuzz
 from sklearn.metrics import jaccard_score
 from sentence_transformers import SentenceTransformer
+import torch
 
 # Download NLTK data
 nltk.download('punkt')
