@@ -281,9 +281,25 @@ if page == 'Model':
 
     # Neural Networks Model
     elif selected_model == "Neural Networks":
-        # Your Neural Networks model code here
-
-        # For example:
         st.title("Neural Networks Model")
-        st.write("This section is dedicated to the Neural Networks model.")
-        # Add your Neural Networks model code and functionalities here
+    
+        # Select option from brand, category, or retailer
+        option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
+    
+        # Display search bar based on the selected option
+        if option:
+            search_query = st.text_input(f"Enter {option} for search:")
+    
+            # Apply model based on user input
+            if option == 'Brand':
+                input_column = 'BRAND'
+            elif option == 'Category':
+                input_column = 'PRODUCT_CATEGORY'
+            elif option == 'Retailer':
+                input_column = 'RETAILER'
+    
+            # Your Neural Networks model code here
+    
+            # For example:
+            st.write("Your Neural Networks model interface goes here.")
+            # Add your Neural Networks model code and functionalities here
