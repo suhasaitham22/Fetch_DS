@@ -242,7 +242,7 @@ if page == 'Model':
                 user_tfidf = vectorizer.transform([search_query])
 
                 # Calculate Cosine similarity between user input and each offer
-                cosine_similarities = cosine_similarity(user_tfidf, tfidf_matrix).flatten()
+                cosine_similarities = linear_kernel(user_tfidf, tfidf_matrix).flatten()
 
                 # Calculate Jaccard similarity between user input and each offer
                 jaccard_similarities = []
@@ -268,12 +268,3 @@ if page == 'Model':
                     st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
-
-                check_future_offers = st.checkbox("Check for offers in the future")
-
-                if check_future_offers:
-                    st.write("Thanks for checking! Please come back to view new offers soon.")
-            else:
-                st.info("Dataset is empty or does not contain any valid offers.")
-        else:
-            st.info("Enter a search query to view results.")
