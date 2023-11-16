@@ -11,6 +11,11 @@ from sklearn.metrics.pairwise import linear_kernel
 from sklearn.metrics.pairwise import cosine_similarity
 from fuzzywuzzy import fuzz
 from sklearn.metrics import jaccard_score
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Embedding, Flatten, Dense, Concatenate
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Download NLTK data
 nltk.download('punkt')
@@ -201,6 +206,92 @@ def preprocess_text_fuzzy(text, target):
     if fuzz.ratio(text, target) >= 50:
         return target
     return text
+    
+# Function to get relevant offers for a user input retailer
+def get_relevant_offers_for_retailer(user_input_retailer):
+    # Fill NaN values in text columns
+    data['OFFER'] = data['OFFER'].fillna('')
+    data['RETAILER'] = data['RETAILER'].fillna('')
+    data['BRAND'] = data['BRAND'].fillna('')
+
+    # Tokenize the text data
+    tokenizer_offer = Tokenizer()
+    tokenizer_offer.fit_on_texts(data['OFFER'])
+    X_offer = tokenizer_offer.texts_to_sequences(data['OFFER'])
+    X_offer = pad_sequences(X_offer)
+
+    tokenizer_retailer = Tokenizer()
+    tokenizer_retailer.fit_on_texts(data['RETAILER'])
+    X_retailer = tokenizer_retailer.texts_to_sequences(data['RETAILER'])
+    X_retailer = pad_sequences(X_retailer)
+
+    tokenizer_brand = Tokenizer()
+    tokenizer_brand.fit_on_texts(data['BRAND'])
+    X_brand = tokenizer_brand.texts_to_sequences(data['BRAND'])
+    X_brand = pad_sequences(X_brand)
+
+    # Standardize the similarity scores
+    scaler = StandardScaler()
+    y = scaler.fit_transform(data['similarity_score'].values.reshape(-1, 1))
+
+    # Split the data into train and test sets
+    X_train_offer, X_test_offer, X_train_retailer, X_test_retailer, X_train_brand, X_test_brand, y_train, y_test = train_test_split(
+        X_offer, X_retailer, X_brand, y, test_size=0.2, random_state=42
+    )
+
+    # Model Architecture
+    embedding_dim = 50
+
+    # Input layers
+    input_offer = Input(shape=(X_train_offer.shape[1],), name='input_offer')
+    input_retailer = Input(shape=(X_train_retailer.shape[1],), name='input_retailer')
+    input_brand = Input(shape=(X_train_brand.shape[1],), name='input_brand')
+
+    # Embedding layers
+    embedding_offer = Embedding(input_dim=len(tokenizer_offer.word_index) + 1, output_dim=embedding_dim)(input_offer)
+    embedding_retailer = Embedding(input_dim=len(tokenizer_retailer.word_index) + 1, output_dim=embedding_dim)(input_retailer)
+    embedding_brand = Embedding(input_dim=len(tokenizer_brand.word_index) + 1, output_dim=embedding_dim)(input_brand)
+
+    # Flatten layers
+    flatten_offer = Flatten()(embedding_offer)
+    flatten_retailer = Flatten()(embedding_retailer)
+    flatten_brand = Flatten()(embedding_brand)
+
+    # Concatenate the flattened layers
+    concatenated = Concatenate()([flatten_offer, flatten_retailer, flatten_brand])
+
+    # Dense layers
+    dense1 = Dense(64, activation='relu')(concatenated)
+    output = Dense(1, activation='linear', name='output')(dense1)
+
+    # Model
+    model = Model(inputs=[input_offer, input_retailer, input_brand], outputs=output)
+
+    # Compile the model
+    model.compile(optimizer=Adam(), loss='mean_squared_error')
+
+    # Train the model
+    model.fit(
+        [X_train_offer, X_train_retailer, X_train_brand],
+        y_train,
+        epochs=10,
+        batch_size=32,
+        validation_split=0.2
+    )
+
+    # Evaluate the model on the test set
+    y_pred = model.predict([X_test_offer, X_test_retailer, X_test_brand])
+
+    # Inverse transform to get the original scale
+    y_pred_original = scaler.inverse_transform(y_pred).flatten()
+    y_test_original = scaler.inverse_transform(y_test)
+
+    # Calculate Mean Squared Error
+    mse = mean_squared_error(y_test_original, y_pred_original)
+    print(f'Mean Squared Error on Test Set: {mse}')
+
+    # Return the result DataFrame or relevant offers based on user input
+    return result_df  # Adjust this to return relevant offers
 
 # Model Page
 if page == 'Model':
@@ -278,41 +369,27 @@ if page == 'Model':
                     st.info("Checking for future offers... (This functionality is not yet implemented)")
             else:
                 st.info("Enter a search query to view results.")
-    # Neural Networks Model
+                
     elif selected_model == "Neural Networks":
         st.title("Neural Networks Model")
-
-        # Select option from brand, category, or retailer
+        
         option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
-
-        # Display search bar based on the selected option
+        
         if option:
             search_query = st.text_input(f"Enter {option} for search:")
-
-            # Apply model based on user input
-            if option == 'Brand':
-                input_column = 'BRAND'
-            elif option == 'Category':
-                input_column = 'PRODUCT_CATEGORY'
-            elif option == 'Retailer':
-                input_column = 'RETAILER'
-
-            # Your Neural Networks model code here
-
-            # Display results only if there is a search query
+        
             if search_query:
-                # Get relevant offers for the user input retailer
                 user_input_retailer = search_query.lower()
                 result_df = get_relevant_offers_for_retailer(user_input_retailer)
-
+    
                 if not result_df.empty:
                     st.header('Top Similar Offers:')
-                    st.dataframe(result_df[[input_column, 'OFFER', 'predicted_score']])
+                    st.dataframe(result_df[['BRAND', 'OFFER', 'predicted_score']])
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
-
+                
                 check_future_offers = st.checkbox("Check for offers in the future")
-
+    
                 if check_future_offers:
                     st.info("Checking for future offers... (This functionality is not yet implemented)")
             else:
