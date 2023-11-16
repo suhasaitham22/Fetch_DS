@@ -218,7 +218,13 @@ def preprocess_text_fuzzy(text, target):
     if fuzz.ratio(text, target) >= 50:
         return target
     return text
+    
+# Helper function to preprocess 'OFFER' column
+def preprocess_offer_column(offer):
+    return str(offer) if isinstance(offer, str) else ''
 
+# Apply preprocessing to the 'OFFER' column
+data['OFFER'] = data['OFFER'].apply(preprocess_offer_column)
 # Model Page
 if page == 'Model':
     st.title("Offer Similarity Analysis from Brands, Category, Retailer Search")
@@ -292,13 +298,6 @@ if page == 'Model':
                         st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
-
-# Helper function to preprocess 'OFFER' column
-def preprocess_offer_column(offer):
-    return str(offer) if isinstance(offer, str) else ''
-
-# Apply preprocessing to the 'OFFER' column
-data['OFFER'] = data['OFFER'].apply(preprocess_offer_column)
 
     # BERT-based Model Approach
     st.subheader("BERT-based Model Approach")
