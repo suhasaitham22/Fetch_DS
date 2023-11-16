@@ -278,18 +278,17 @@ if page == 'Model':
                     st.info("Checking for future offers... (This functionality is not yet implemented)")
             else:
                 st.info("Enter a search query to view results.")
-
     # Neural Networks Model
     elif selected_model == "Neural Networks":
         st.title("Neural Networks Model")
-    
+
         # Select option from brand, category, or retailer
         option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
-    
+
         # Display search bar based on the selected option
         if option:
             search_query = st.text_input(f"Enter {option} for search:")
-    
+
             # Apply model based on user input
             if option == 'Brand':
                 input_column = 'BRAND'
@@ -297,14 +296,18 @@ if page == 'Model':
                 input_column = 'PRODUCT_CATEGORY'
             elif option == 'Retailer':
                 input_column = 'RETAILER'
-    
+
             # Your Neural Networks model code here
-    
+
             # Display results only if there is a search query
             if search_query:
-                if not filtered_data.empty:
+                # Get relevant offers for the user input retailer
+                user_input_retailer = search_query.lower()
+                result_df = get_relevant_offers_for_retailer(user_input_retailer)
+
+                if not result_df.empty:
                     st.header('Top Similar Offers:')
-                    st.dataframe()
+                    st.dataframe(result_df[[input_column, 'OFFER', 'predicted_score']])
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
 
