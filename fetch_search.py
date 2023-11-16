@@ -313,14 +313,16 @@ if page == 'Model':
                     # Inverse transform to get the original scale
                     user_pred_original = scaler.inverse_transform(user_pred_absolute).flatten()
                 
-                    # Create a DataFrame with the relevant information
-                    result_df = pd.DataFrame({
-                        'OFFER': data['OFFER'],
-                        'RETAILER': data['RETAILER'],
-                        'BRAND': data['BRAND'],
-                        'PRODUCT_CATEGORY': data['PRODUCT_CATEGORY'],
-                        'predicted_score': user_pred_original
-                    })
+                    # Call the function with all required arguments
+                    result_df = get_relevant_offers_for_retailer(
+                        search_query.lower(),
+                        data,  # Pass the 'data' variable
+                        tokenizer_offer,  # Pass the 'tokenizer_offer' variable
+                        tokenizer_retailer,  # Pass the 'tokenizer_retailer' variable
+                        tokenizer_brand,  # Pass the 'tokenizer_brand' variable
+                        model,  # Pass the 'model' variable
+                        scaler  # Pass the 'scaler' variable
+                    )
                 
                     # Filter offers for the specified retailer
                     result_df = result_df[result_df['RETAILER'].str.lower() == user_input_retailer.lower()]
