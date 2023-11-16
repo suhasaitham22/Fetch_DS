@@ -15,3 +15,4 @@ scikit-learn>=0.18
 scipy>=0.15.1
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.12.2
+sentence-transformers==2.1.0
