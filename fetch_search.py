@@ -203,7 +203,8 @@ def preprocess_text_fuzzy(text, target):
         return target
     return text
 
-# Model Pageif page == 'Model':
+# Model Page
+if page == 'Model':
     st.title("Offer Similarity Analysis from Brands, Category, Retailer Search")
 
     # Select option from brand, category, or retailer
