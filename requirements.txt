@@ -19,3 +19,4 @@ sentence-transformers==2.2.2
 tqdm==4.62.3
 transformers==4.21.2
 numpy<1.23.0
+torch==1.2.0
