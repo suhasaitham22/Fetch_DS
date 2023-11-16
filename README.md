@@ -2,6 +2,10 @@
 
 This repository contains code for an application that performs similarity analysis on offers based on brands, categories, and retailers. The application allows users to search for specific brands, categories, or retailers and retrieves similar offers using text similarity metrics.
 
+## Streamlit App
+
+[Link to the Streamlit App](https://fetchds-ubwbhytyb8xf45gvt5oghv.streamlit.app/)
+
 ## Overview
 
 The repository includes the following files:
