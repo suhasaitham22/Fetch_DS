@@ -9,6 +9,7 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import StandardScaler
 from fuzzywuzzy import fuzz
 from sklearn.metrics import jaccard_score
 from tensorflow.keras.models import Model
