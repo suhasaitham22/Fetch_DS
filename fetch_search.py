@@ -188,10 +188,13 @@ if page == 'Data and Preprocessing':
         )
         st.text(join_explanation_1)
     
-        # Joining on 'BRAND_BELONGS_TO_CATEGORY'
-        merged_data = pd.merge(merged_data, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='outer')
-        merged_data = merged_data.drop('BRAND_BELONGS_TO_CATEGORY', axis=1)
+        # Left join on 'BRAND'
+        merged_data = pd.merge(retailer, brands, on='BRAND', how='outer')
         
+        # Left join on 'BRAND_BELONGS_TO_CATEGORY' and 'PRODUCT_CATEGORY'
+        merged_data = pd.merge(merged_data, categories, left_on='BRAND_BELONGS_TO_CATEGORY', right_on='PRODUCT_CATEGORY', how='left')        
+        merged_data = merged_data.drop('BRAND_BELONGS_TO_CATEGORY', axis=1)
+                
         join_explanation_2 = (
             "In continuation, the resulting dataset from the previous step was further joined with the 'categories' dataset "
             "based on the 'BRAND_BELONGS_TO_CATEGORY' column. This inner join was performed to consolidate additional "
@@ -275,8 +278,16 @@ if page == 'Model':
                 filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
 
                 if not filtered_data.empty:
-                    # Display only the selected columns
-                    st.header('Top Similar Offers:')
-                    st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
+                    if len(filtered_data) > 5:
+                        show_top_5 = st.checkbox("Show Top 5 Offers")
+                        if show_top_5:
+                            st.header('Top 5 Similar Offers:')
+                            st.dataframe(filtered_data.head(5)[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
+                        else:
+                            st.header(f'Top {len(filtered_data)} Similar Offers:')
+                            st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
+                    else:
+                        st.header('Top Similar Offers:')
+                        st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
