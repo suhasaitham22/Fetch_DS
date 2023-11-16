@@ -229,133 +229,121 @@ def cos_sim(a, b):
     
 # Apply preprocessing to the 'OFFER' column
 data['OFFER'] = data['OFFER'].apply(preprocess_offer_column)
-# Model Page
+
+
 if page == 'Model':
     st.title("Offer Similarity Analysis from Brands, Category, Retailer Search")
 
-    # Select option from brand, category, or retailer
-    option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
+    # Selecting the model
+    selected_model = st.radio("Select Model:", ("TF-IDF Model", "BERT Model"))
 
-    # Display search bar based on the selected option
-    if option:
-        search_query = st.text_input(f"Enter {option} for search:")
+    if selected_model == "TF-IDF Model":
+        # TF-IDF Model
+        option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
 
-        if search_query:
-            # Apply model based on user input
-            if option == 'Brand':
-                input_column = 'BRAND'
-            elif option == 'Category':
-                input_column = 'PRODUCT_CATEGORY'
-            elif option == 'Retailer':
-                input_column = 'RETAILER'
+        if option:
+            search_query = st.text_input(f"Enter {option} for search:")
 
-            # Use only the 'OFFER' column for text similarity calculation
-            data['combined_text'] = data['OFFER']
+            if search_query:
+                # Apply model based on user input
+                if option == 'Brand':
+                    input_column = 'BRAND'
+                elif option == 'Category':
+                    input_column = 'PRODUCT_CATEGORY'
+                elif option == 'Retailer':
+                    input_column = 'RETAILER'
 
-            # Fill NaN values in the 'combined_text' column with an empty string
-            data['combined_text'] = data['combined_text'].fillna('')
+                # Use only the 'OFFER' column for text similarity calculation
+                data['combined_text'] = data['OFFER']
 
-            # Exclude rows where 'OFFER' is empty or NaN
-            data = data.dropna(subset=['OFFER'])
-            data = data[data['OFFER'] != '']
+                # Fill NaN values in the 'combined_text' column with an empty string
+                data['combined_text'] = data['combined_text'].fillna('')
 
-            if not data.empty:
-                # Create a TF-IDF vectorizer
-                vectorizer = TfidfVectorizer()
-                tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
+                # Exclude rows where 'OFFER' is empty or NaN
+                data = data.dropna(subset=['OFFER'])
+                data = data[data['OFFER'] != '']
 
-                # Transform the user input using the same vectorizer
-                user_tfidf = vectorizer.transform([search_query])
+                if not data.empty:
+                    # Create a TF-IDF vectorizer
+                    vectorizer = TfidfVectorizer()
+                    tfidf_matrix = vectorizer.fit_transform(data['combined_text'])
 
-                # Calculate Cosine similarity between user input and each offer
-                cosine_similarities = linear_kernel(user_tfidf, tfidf_matrix).flatten()
+                    # Transform the user input using the same vectorizer
+                    user_tfidf = vectorizer.transform([search_query])
 
-                # Calculate Jaccard similarity between user input and each offer
-                jaccard_similarities = []
-                for offer_text in data['combined_text']:
-                    offer_words = set(offer_text.split())
-                    user_words = set(search_query.split())
-                    jaccard = len(offer_words.intersection(user_words)) / len(offer_words.union(user_words))
-                    jaccard_similarities.append(jaccard)
+                    # Calculate Cosine similarity between user input and each offer
+                    cosine_similarities = linear_kernel(user_tfidf, tfidf_matrix).flatten()
+
+                    # Add the similarity scores to the data DataFrame
+                    data['Cosine Similarity'] = cosine_similarities
+
+                    # Sort offers based on similarity scores
+                    sorted_data = data.sort_values(by='Cosine Similarity', ascending=False)
+
+                    # Filter results based on user input criteria
+                    filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
+
+                    if not filtered_data.empty:
+                        if len(filtered_data) > 5:
+                            show_top_5 = st.checkbox("Show Top 5 Offers")
+                            if show_top_5:
+                                st.header('Top 5 Similar Offers:')
+                                st.dataframe(filtered_data.head(5)[['OFFER', 'Cosine Similarity']])
+                            else:
+                                st.header(f'Top {len(filtered_data)} Similar Offers:')
+                                st.dataframe(filtered_data[['OFFER', 'Cosine Similarity']])
+                        else:
+                            st.header('Top Similar Offers:')
+                            st.dataframe(filtered_data[['OFFER', 'Cosine Similarity']])
+                    else:
+                        st.info(f"No offers found for the given search query: '{search_query}'.")
+
+    elif selected_model == "BERT Model":
+        # BERT Model
+        bert_option = st.selectbox("Select option for BERT model:", ('Brand', 'Category', 'Retailer'))
+
+        if bert_option:
+            bert_search_query = st.text_input(f"Enter {bert_option} for BERT model search:")
+
+            if bert_search_query:
+                # Apply BERT-based model based on user input
+                if bert_option == 'Brand':
+                    bert_input_column = 'BRAND'
+                elif bert_option == 'Category':
+                    bert_input_column = 'PRODUCT_CATEGORY'
+                elif bert_option == 'Retailer':
+                    bert_input_column = 'RETAILER'
+
+                # Load pre-trained BERT model for sentence embeddings
+                bert_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+
+                # Encode the data and user input for BERT
+                bert_encoded_data = bert_model.encode(data['OFFER'].tolist(), convert_to_tensor=True)
+                bert_encoded_query = bert_model.encode([bert_search_query], convert_to_tensor=True)
+
+                # Calculate cosine similarity using BERT embeddings
+                bert_cosine_similarities = torch.nn.functional.cosine_similarity(bert_encoded_query, bert_encoded_data)
 
                 # Add the similarity scores to the data DataFrame
-                data['Cosine Similarity'] = cosine_similarities
-                data['Jaccard Similarity'] = jaccard_similarities
+                data['Cosine Similarity (BERT)'] = bert_cosine_similarities.cpu().numpy()
 
-                # Sort offers based on both similarity scores
-                sorted_data = data.sort_values(by=['Cosine Similarity', 'Jaccard Similarity'], ascending=False)
+                # Sort offers based on BERT similarity scores
+                bert_sorted_data = data.sort_values(by='Cosine Similarity (BERT)', ascending=False)
 
-                # Filter results based on user input criteria
-                filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
+                # Filter results based on user input criteria for BERT
+                bert_filtered_data = bert_sorted_data[bert_sorted_data[bert_input_column].str.lower().str.contains(bert_search_query.lower(), na=False)]
 
-                if not filtered_data.empty:
-                    if len(filtered_data) > 5:
-                        show_top_5 = st.checkbox("Show Top 5 Offers")
-                        if show_top_5:
-                            st.header('Top 5 Similar Offers:')
-                            st.dataframe(filtered_data.head(5)[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
+                if not bert_filtered_data.empty:
+                    if len(bert_filtered_data) > 5:
+                        bert_show_top_5 = st.checkbox("Show Top 5 Offers (BERT)")
+                        if bert_show_top_5:
+                            st.header('Top 5 Similar Offers (BERT):')
+                            st.dataframe(bert_filtered_data.head(5)[['OFFER', 'Cosine Similarity (BERT)']])
                         else:
-                            st.header(f'Top {len(filtered_data)} Similar Offers:')
-                            st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
+                            st.header(f'Top {len(bert_filtered_data)} Similar Offers (BERT):')
+                            st.dataframe(bert_filtered_data[['OFFER', 'Cosine Similarity (BERT)']])
                     else:
-                        st.header('Top Similar Offers:')
-                        st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
-                else:
-                    st.info(f"No offers found for the given search query: '{search_query}'.")
-
-    # BERT-based Model Approach
-    st.subheader("BERT-based Model Approach")
-
-    # Select option from brand, category, or retailer for BERT-based model
-    bert_option = st.selectbox("Select option for BERT model:", ('Brand', 'Category', 'Retailer'))
-
-    # Display search bar based on the selected option for BERT model
-    if bert_option:
-        bert_search_query = st.text_input(f"Enter {bert_option} for BERT model search:")
-
-        if bert_search_query:
-            # Apply BERT-based model based on user input
-            if bert_option == 'Brand':
-                bert_input_column = 'BRAND'
-            elif bert_option == 'Category':
-                bert_input_column = 'PRODUCT_CATEGORY'
-            elif bert_option == 'Retailer':
-                bert_input_column = 'RETAILER'
-
-            # Load pre-trained BERT model for sentence embeddings
-            bert_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-
-            # Encode the data and user input for BERT
-            bert_encoded_data = bert_model.encode(data['OFFER'].tolist(), convert_to_tensor=True)
-            bert_encoded_query = bert_model.encode([bert_search_query], convert_to_tensor=True)
-
-            # Calculate cosine similarity using BERT embeddings
-            bert_cosine_similarities = cos_sim(bert_encoded_query, bert_encoded_data)
-
-            # Add the similarity scores to the data DataFrame
-            data['Cosine Similarity (BERT)'] = bert_cosine_similarities.cpu().numpy()
-
-            # Sort offers based on BERT similarity scores
-            bert_sorted_data = data.sort_values(by='Cosine Similarity (BERT)', ascending=False)
-
-            # Filter results based on user input criteria for BERT
-            bert_filtered_data = bert_sorted_data[bert_sorted_data[bert_input_column].str.lower().str.contains(bert_search_query.lower(), na=False)]
-
-            if not bert_filtered_data.empty:
-                if len(bert_filtered_data) > 5:
-                    bert_show_top_5 = st.checkbox("Show Top 5 Offers (BERT)")
-                    if bert_show_top_5:
-                        st.header('Top 5 Similar Offers (BERT):')
-                        st.dataframe(bert_filtered_data.head(5)[['OFFER', 'Cosine Similarity (BERT)']])
-                    else:
-                        st.header(f'Top {len(bert_filtered_data)} Similar Offers (BERT):')
+                        st.header('Top Similar Offers (BERT):')
                         st.dataframe(bert_filtered_data[['OFFER', 'Cosine Similarity (BERT)']])
                 else:
-                    st.header('Top Similar Offers (BERT):')
-                    st.dataframe(bert_filtered_data[['OFFER', 'Cosine Similarity (BERT)']])
-            else:
-                st.info(f"No offers found for the given search query using BERT: '{bert_search_query}'.")
-
-# Helper function for cosine similarity calculation
-def cos_sim(a, b):
-    return torch.nn.functional.cosine_similarity(a, b)
+                    st.info(f"No offers found for the given search query using BERT: '{bert_search_query}'.")
