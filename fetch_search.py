@@ -293,6 +293,13 @@ if page == 'Model':
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
 
+# Helper function to preprocess 'OFFER' column
+def preprocess_offer_column(offer):
+    return str(offer) if isinstance(offer, str) else ''
+
+# Apply preprocessing to the 'OFFER' column
+data['OFFER'] = data['OFFER'].apply(preprocess_offer_column)
+
     # BERT-based Model Approach
     st.subheader("BERT-based Model Approach")
 
@@ -349,5 +356,3 @@ if page == 'Model':
 # Helper function for cosine similarity calculation
 def cos_sim(a, b):
     return torch.nn.functional.cosine_similarity(a, b)
-
-
