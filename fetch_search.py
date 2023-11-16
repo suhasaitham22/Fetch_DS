@@ -234,7 +234,7 @@ def get_relevant_offers_for_retailer(user_input_retailer, data, tokenizer_offer,
 
     result_df.reset_index(drop=True, inplace=True)
 
-    return result_df.head(10)   
+    return result_df 
 
 # Model Page
 if page == 'Model':
