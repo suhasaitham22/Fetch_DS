@@ -12,6 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 from fuzzywuzzy import fuzz
 from sklearn.metrics import jaccard_score
+from sentence_transformers import SentenceTransformer
 
 # Download NLTK data
 nltk.download('punkt')
@@ -291,3 +292,62 @@ if page == 'Model':
                         st.dataframe(filtered_data[['OFFER', 'Cosine Similarity', 'Jaccard Similarity']])
                 else:
                     st.info(f"No offers found for the given search query: '{search_query}'.")
+
+    # BERT-based Model Approach
+    st.subheader("BERT-based Model Approach")
+
+    # Select option from brand, category, or retailer for BERT-based model
+    bert_option = st.selectbox("Select option for BERT model:", ('Brand', 'Category', 'Retailer'))
+
+    # Display search bar based on the selected option for BERT model
+    if bert_option:
+        bert_search_query = st.text_input(f"Enter {bert_option} for BERT model search:")
+
+        if bert_search_query:
+            # Apply BERT-based model based on user input
+            if bert_option == 'Brand':
+                bert_input_column = 'BRAND'
+            elif bert_option == 'Category':
+                bert_input_column = 'PRODUCT_CATEGORY'
+            elif bert_option == 'Retailer':
+                bert_input_column = 'RETAILER'
+
+            # Load pre-trained BERT model for sentence embeddings
+            bert_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+
+            # Encode the data and user input for BERT
+            bert_encoded_data = bert_model.encode(data['OFFER'].tolist(), convert_to_tensor=True)
+            bert_encoded_query = bert_model.encode([bert_search_query], convert_to_tensor=True)
+
+            # Calculate cosine similarity using BERT embeddings
+            bert_cosine_similarities = cos_sim(bert_encoded_query, bert_encoded_data)
+
+            # Add the similarity scores to the data DataFrame
+            data['Cosine Similarity (BERT)'] = bert_cosine_similarities.cpu().numpy()
+
+            # Sort offers based on BERT similarity scores
+            bert_sorted_data = data.sort_values(by='Cosine Similarity (BERT)', ascending=False)
+
+            # Filter results based on user input criteria for BERT
+            bert_filtered_data = bert_sorted_data[bert_sorted_data[bert_input_column].str.lower().str.contains(bert_search_query.lower(), na=False)]
+
+            if not bert_filtered_data.empty:
+                if len(bert_filtered_data) > 5:
+                    bert_show_top_5 = st.checkbox("Show Top 5 Offers (BERT)")
+                    if bert_show_top_5:
+                        st.header('Top 5 Similar Offers (BERT):')
+                        st.dataframe(bert_filtered_data.head(5)[['OFFER', 'Cosine Similarity (BERT)']])
+                    else:
+                        st.header(f'Top {len(bert_filtered_data)} Similar Offers (BERT):')
+                        st.dataframe(bert_filtered_data[['OFFER', 'Cosine Similarity (BERT)']])
+                else:
+                    st.header('Top Similar Offers (BERT):')
+                    st.dataframe(bert_filtered_data[['OFFER', 'Cosine Similarity (BERT)']])
+            else:
+                st.info(f"No offers found for the given search query using BERT: '{bert_search_query}'.")
+
+# Helper function for cosine similarity calculation
+def cos_sim(a, b):
+    return torch.nn.functional.cosine_similarity(a, b)
+
+
