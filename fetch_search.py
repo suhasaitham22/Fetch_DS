@@ -312,6 +312,7 @@ if page == 'Model':
                 
                     # Inverse transform to get the original scale
                     user_pred_original = scaler.inverse_transform(user_pred_absolute).flatten()
+                    
                     # Call the function with all required arguments
                     result_df = get_relevant_offers_for_retailer(
                         search_query.lower(),
