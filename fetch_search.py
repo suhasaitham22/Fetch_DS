@@ -296,42 +296,42 @@ if page == 'Model':
             
             if search_query:
                 # Function to get relevant offers for a user input retailer
-                def get_relevant_offers_for_retailer(user_input_retailer):
+                def get_relevant_offers_for_retailer(user_input_retailer, data, tokenizer_offer, tokenizer_retailer, tokenizer_brand, model, scaler):
                     # Transform the user input using the tokenizer
                     user_input_sequence_retailer = tokenizer_retailer.texts_to_sequences([user_input_retailer])
-                    user_input_sequence_retailer = pad_sequences(user_input_sequence_retailer, maxlen=X_retailer.shape[1])
-    
+                    user_input_sequence_retailer = pad_sequences(user_input_sequence_retailer, maxlen=tokenizer_retailer.document_count)
+                
                     # Repeat the user input sequence for each offer
-                    user_input_sequence_retailer_broadcasted = np.repeat(user_input_sequence_retailer, X_offer.shape[0], axis=0)
-    
+                    user_input_sequence_retailer_broadcasted = np.repeat(user_input_sequence_retailer, tokenizer_offer.document_count, axis=0)
+                
                     # Predict the similarity scores for the user input
                     user_pred = model.predict([X_offer, user_input_sequence_retailer_broadcasted, X_brand])
-    
+                
                     # Take the absolute value of the predicted scores
                     user_pred_absolute = np.abs(user_pred)
-    
+                
                     # Inverse transform to get the original scale
                     user_pred_original = scaler.inverse_transform(user_pred_absolute).flatten()
-    
+                
                     # Create a DataFrame with the relevant information
                     result_df = pd.DataFrame({
-                        'OFFER': merged_data['OFFER'],
-                        'RETAILER': merged_data['RETAILER'],
-                        'BRAND': merged_data['BRAND'],
-                        'PRODUCT_CATEGORY': merged_data['PRODUCT_CATEGORY'],
+                        'OFFER': data['OFFER'],
+                        'RETAILER': data['RETAILER'],
+                        'BRAND': data['BRAND'],
+                        'PRODUCT_CATEGORY': data['PRODUCT_CATEGORY'],
                         'predicted_score': user_pred_original
                     })
-    
+                
                     # Filter offers for the specified retailer
                     result_df = result_df[result_df['RETAILER'].str.lower() == user_input_retailer.lower()]
-    
+                
                     # Sort offers based on predicted score
                     result_df = result_df.sort_values(by='predicted_score', ascending=False)
-    
+                
                     # Reset index
                     result_df.reset_index(drop=True, inplace=True)
-    
-                    return result_df.head(10)  # Adjust the number of rows as needed
+                
+                    return result_df.head(10) 
     
                 result_df = get_relevant_offers_for_retailer(search_query.lower())
     
