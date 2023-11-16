@@ -12,11 +12,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import StandardScaler
 from fuzzywuzzy import fuzz
 from sklearn.metrics import jaccard_score
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Embedding, Flatten, Dense, Concatenate
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Download NLTK data
 nltk.download('punkt')
@@ -240,11 +235,6 @@ def get_relevant_offers_for_retailer(user_input_retailer, data, tokenizer_offer,
 if page == 'Model':
     st.title("Offer Similarity Analysis from Brands, Category, Retailer Search")
 
-    # Add a selection bar for choosing the model
-    selected_model = st.sidebar.radio("Select Model:", ("TF-IDF", "Neural Networks"))
-
-    # TF-IDF Model
-    if selected_model == "TF-IDF":
         # Select option from brand, category, or retailer
         option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
 
@@ -312,35 +302,3 @@ if page == 'Model':
                     st.info("Checking for future offers... (This functionality is not yet implemented)")
             else:
                 st.info("Enter a search query to view results.")
-
-    elif selected_model == "Neural Networks":
-        st.title("Neural Networks Model")
-            
-        option = st.selectbox("Select option:", ('Brand', 'Category', 'Retailer'))
-            
-        if option and (search_query := st.text_input(f"Enter {option} for search:")):
-            result_df = get_relevant_offers_for_retailer(
-                search_query.lower(),
-                data,
-                tokenizer_offer,
-                tokenizer_retailer,
-                tokenizer_brand,
-                model,
-                scaler
-            )
-        
-            if result_df is not None:
-                if not result_df.empty:
-                    st.header('Top Similar Offers:')
-                    st.dataframe(result_df[['BRAND', 'OFFER', 'predicted_score']])
-                else:
-                    st.info(f"No offers found for the given search query: '{search_query}'.")
-        
-                check_future_offers = st.checkbox("Check for offers in the future")
-        
-                if check_future_offers:
-                    st.info("Checking for future offers... (This functionality is not yet implemented)")
-            else:
-                st.info("Enter a search query to view results.")
-        else:
-            st.info("Enter a search query to view results.")
