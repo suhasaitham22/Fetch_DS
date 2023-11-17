@@ -273,6 +273,7 @@ if page == 'Model':
                     filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
     
                     if not filtered_data.empty:
+                        filtered_data = filtered_data.drop_duplicates(subset=['OFFER'])
                         st.header('Similar Offers:')
                         if len(filtered_data) > 5:
                             show_top_5 = st.checkbox("Show Top 5 Offers")
@@ -309,7 +310,8 @@ if page == 'Model':
                         # Remove null or empty offers
                         bert_filtered_data = bert_filtered_data.dropna(subset=['OFFER'])
                         bert_filtered_data = bert_filtered_data[bert_filtered_data['OFFER'] != '']
-    
+                        bert_filtered_data = bert_filtered_data.drop_duplicates(subset=['OFFER'])
+
                         if not bert_filtered_data.empty:
                             st.header('Similar Offers (BERT):')
                             if len(bert_filtered_data) > 5:
