@@ -36,7 +36,6 @@ Once the application is running, you can navigate through different functionalit
 ## Future Improvements
 
 - Incorporating user authentication for personalized search experiences.
-- Enhancing the similarity analysis by implementing more advanced NLP techniques.
 - Building a recommendation system for users based on their search history.
 
 Feel free to explore the code and datasets or contribute to enhancing the functionality of the application.
