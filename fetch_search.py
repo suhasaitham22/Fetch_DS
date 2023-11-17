@@ -46,7 +46,7 @@ if page == 'Home':
     st.write("To achieve this, we performed the following steps:")
     st.markdown("1. **Data Preprocessing:** Cleaned and processed data, including filling missing values, converting to lowercase, removing punctuation, and handling common terms.")
     st.markdown("2. **Joining Data:** Merged 'retailer' and 'brands' datasets on 'BRAND' column, then joined the result with 'categories' dataset on 'BRAND_BELONGS_TO_CATEGORY' column.")
-    st.markdown("3. **Modeling:** Implemented a model that intelligently searches and retrieves relevant offers based on user input. The model utilizes TF-IDF vectorization, Cosine Similarity, and Jaccard Similarity to analyze text data and generate similarity scores. It effectively sorts and filters offers to present the most relevant matches to the user's search query.")
+    st.markdown("3. **Modeling:** Implemented models to intelligently search and retrieve relevant offers based on user input. The first model utilizes TF-IDF vectorization and Cosine Similarity to analyze text data, while the second model employs a BERT-based approach to generate similarity scores. Both models effectively sort and filter offers, presenting the most relevant matches to the user's search query.")
 
     # Add a section about why you are interested in Fetch Rewards and your strengths
     st.subheader("Why Fetch Rewards?")
