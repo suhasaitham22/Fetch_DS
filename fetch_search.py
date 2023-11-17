@@ -35,7 +35,7 @@ page = st.sidebar.radio("Go to", ('Home', 'Data and Preprocessing', 'Model'))
 # Home Page
 if page == 'Home':
     st.title("Home Page")
-    st.write("Welcome! This application performs data preprocessing and allows you to search for similar offers using a TF-IDF model.")
+    st.write("Welcome! This application performs data preprocessing and allows you to search for similar offers using a NLP model.")
 
     # Add a summary of the task and solution approach
     st.subheader("Task Summary:")
