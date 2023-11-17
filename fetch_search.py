@@ -284,21 +284,17 @@ if page == 'Model':
                     filtered_data = sorted_data[sorted_data[input_column].str.lower().str.contains(search_query.lower(), na=False)]
 
                     if not filtered_data.empty:
-                        if len(filtered_data) > 5:
-                            show_top_5 = st.checkbox("Show Top 5 Offers")
-                            if show_top_5:
-                                st.header('Top 5 Similar Offers:')
-                                st.dataframe(filtered_data.head(5)[['OFFER', 'Cosine Similarity']])
-                            else:
-                                st.header(f'Top {len(filtered_data)} Similar Offers:')
-                                st.dataframe(filtered_data[['OFFER', 'Cosine Similarity']])
-                        else:
-                            st.header('Top Similar Offers:')
-                            st.dataframe(filtered_data[['OFFER', 'Cosine Similarity']])
-                    else:
-                        st.info(f"No offers found for the given search query: '{search_query}'.")
+                        # Remove null or empty offers
+                        filtered_data = filtered_data.dropna(subset=['OFFER'])
+                        filtered_data = filtered_data[filtered_data['OFFER'] != '']
 
-    
+                        if not filtered_data.empty:
+                            # Display unique offers
+                            unique_offers = filtered_data['OFFER'].unique()
+                            st.header('Similar Offers:')
+                            st.write(unique_offers)
+
+
     elif selected_model == "BERT Model":
         # BERT Model
         bert_option = st.selectbox("Select option for BERT model:", ('Brand', 'Category', 'Retailer'))
@@ -339,25 +335,27 @@ if page == 'Model':
                     bert_filtered_data = bert_sorted_data[bert_sorted_data[bert_input_column].str.lower().str.contains(bert_search_query.lower(), na=False)]
 
                     if not bert_filtered_data.empty:
-                        # Filter out rows with null values in 'OFFER' column after calculating similarity
+                        # Remove null or empty offers
                         bert_filtered_data = bert_filtered_data.dropna(subset=['OFFER'])
-                
+                        bert_filtered_data = bert_filtered_data[bert_filtered_data['OFFER'] != '']
+                    
                         if not bert_filtered_data.empty:
-                            # Remove duplicate offers based on the 'OFFER' column
-                            bert_filtered_data = bert_filtered_data.drop_duplicates(subset=['OFFER'])
-                
-                            if not bert_filtered_data.empty:
-                                # Display results without null values and duplicates in 'OFFER' column
-                                if len(bert_filtered_data) > 5:
-                                    bert_show_top_5 = st.checkbox("Show Top 5 Offers (BERT)")
-                                    if bert_show_top_5:
-                                        st.header('Top 5 Unique Similar Offers (BERT):')
-                                        st.dataframe(bert_filtered_data.head(5)[['OFFER', 'Cosine Similarity (BERT)']])
-                                    else:
-                                        st.header(f'Top {len(bert_filtered_data)} Unique Similar Offers (BERT):')
-                                        st.dataframe(bert_filtered_data[['OFFER', 'Cosine Similarity (BERT)']])
+                            # Display unique offers
+                            unique_bert_offers = bert_filtered_data['OFFER'].unique()
+                            st.header('Similar Offers (BERT):')
+                            st.write(unique_bert_offers)
+                            if len(bert_filtered_data) > 5:
+                                bert_show_top_5 = st.checkbox("Show Top 5 Offers (BERT)")
+                                if bert_show_top_5:
+                                    st.header('Top 5 Similar Offers (BERT):')
+                                    st.dataframe(bert_filtered_data.head(5)[['OFFER', 'Cosine Similarity (BERT)']])
                                 else:
-                                    st.header('Top Unique Similar Offers (BERT):')
+                                    st.header(f'Top {len(bert_filtered_data)} Similar Offers (BERT):')
                                     st.dataframe(bert_filtered_data[['OFFER', 'Cosine Similarity (BERT)']])
                             else:
-                                st.info("Currently, there are no unique offers available matching the search criteria. The system will continuously check for future unique offers.")
+                                st.header('Top Similar Offers (BERT):')
+                                st.dataframe(bert_filtered_data[['OFFER', 'Cosine Similarity (BERT)']])
+                        else:
+                            st.info(f"No offers found for the given search query using BERT: '{bert_search_query}'.")
+                    else:
+                        st.info("Currently, there are no offers. Please keep checking for future offers.")
