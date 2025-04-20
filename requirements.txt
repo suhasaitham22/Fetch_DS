@@ -20,5 +20,3 @@ sentence-transformers==2.2.2
 tqdm==4.62.3
 transformers==4.21.2
 torch>=1.7.0
-protobuf==3.20.3
-altair==4.2.2
